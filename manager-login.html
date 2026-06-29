@@ -170,15 +170,15 @@
         import { getAuth, signInWithEmailAndPassword, signOut, setPersistence, browserLocalPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            databaseURL: "YOUR_DATABASE_URL",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
+       const firebaseConfig = {
+  apiKey: "AIzaSyDtPkeLFdZqviWfinIMzdHxRHuv47TvUjY",
+  authDomain: "mini-tsm-projectv2.firebaseapp.com",
+  databaseURL: "https://mini-tsm-projectv2-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "mini-tsm-projectv2",
+  storageBucket: "mini-tsm-projectv2.firebasestorage.app",
+  messagingSenderId: "535774659933",
+  appId: "1:535774659933:web:600122096d9dea2f5514b4"
+};
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
