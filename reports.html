@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo cáo & Lịch sử - TMS Mini v2.0</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-color: #1a1a2e;
+            --sidebar-bg: #111827;
+            --card-bg: #16213e;
+            --accent-color: #e94560;
+            --success-color: #4cd137;
+            --danger-color: #e84118;
+            --warning-color: #fbc531;
+            --text-main: #ffffff;
+            --text-muted: #a0a0b5;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 260px; background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex; flex-direction: column;
+            position: fixed; height: 100vh; z-index: 1000;
+        }
+        .sidebar-header {
+            padding: 20px; font-size: 1.5rem; font-weight: 700;
+            text-align: center; border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .sidebar-header span { color: var(--accent-color); }
+        .menu { flex: 1; padding: 20px 0; }
+        .menu-item {
+            padding: 15px 25px; display: flex; align-items: center; gap: 15px;
+            color: var(--text-muted); text-decoration: none; transition: all 0.2s;
+        }
+        .menu-item:hover, .menu-item.active {
+            background-color: rgba(233, 69, 96, 0.1); color: var(--accent-color);
+            border-right: 3px solid var(--accent-color);
+        }
+        .sidebar-footer { padding: 20px; border-top: 1px solid var(--border-color); }
+        .btn-logout {
+            width: 100%; padding: 12px; background: none; border: 1px solid var(--status-issue, #e84118);
+            color: var(--status-issue, #e84118); border-radius: 8px; cursor: pointer; transition: 0.2s;
+        }
+        .btn-logout:hover { background: var(--status-issue, #e84118); color: white; }
+
+        /* --- MAIN CONTENT --- */
+        .main-content {
+            flex: 1; margin-left: 260px; padding: 20px 30px;
+            display: flex; flex-direction: column; gap: 20px;
+        }
+        .topbar {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 10px;
+        }
+        .page-title { font-size: 1.8rem; font-weight: 600; }
+        .btn-export {
+            background-color: var(--success-color); color: white; border: none;
+            padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;
+            display: flex; align-items: center; gap: 8px; transition: opacity 0.2s;
+        }
+        .btn-export:hover { opacity: 0.8; }
+
+        /* --- FILTERS --- */
+        .filter-section {
+            background-color: var(--card-bg); border-radius: 12px; padding: 20px;
+            border: 1px solid var(--border-color); display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;
+        }
+        .form-group { display: flex; flex-direction: column; flex: 1; min-width: 180px; }
+        .form-group label { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; }
+        .form-control {
+            padding: 10px 15px; background-color: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-color); border-radius: 8px;
+            color: var(--text-main); font-family: inherit; outline: none; color-scheme: dark;
+        }
+        .form-control:focus { border-color: var(--accent-color); }
+        .filter-actions { display: flex; gap: 10px; }
+        .btn-filter {
+            background-color: var(--accent-color); color: white; border: none;
+            padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500; height: 40px;
+        }
+        .btn-reset {
+            background-color: transparent; color: var(--text-muted); border: 1px solid var(--text-muted);
+            padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500; height: 40px;
+        }
+        .btn-filter:hover { background-color: #d13a53; }
+        .btn-reset:hover { border-color: white; color: white; }
+
+        /* --- KPIs --- */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+        .kpi-card {
+            background-color: var(--card-bg); border-radius: 12px; padding: 20px;
+            border: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px;
+        }
+        .kpi-icon {
+            width: 50px; height: 50px; border-radius: 10px; display: flex;
+            align-items: center; justify-content: center; font-size: 1.5rem;
+        }
+        .kpi-info h3 { font-size: 1.6rem; font-weight: 700; margin-bottom: 5px; }
+        .kpi-info p { color: var(--text-muted); font-size: 0.9rem; }
+
+        /* --- TABLE --- */
+        .table-section {
+            background-color: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color);
+            overflow: hidden; flex: 1;
+        }
+        .table-wrapper { overflow-x: auto; max-height: 500px; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 12px 15px; border-bottom: 1px solid var(--border-color); white-space: nowrap; font-size: 0.95rem; }
+        th { color: var(--text-muted); font-weight: 500; position: sticky; top: 0; background: var(--card-bg); z-index: 10; box-shadow: 0 1px 0 var(--border-color); }
+        .status-badge { padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
+        
+        .st-done { background: rgba(76, 209, 55, 0.2); color: var(--success-color); }
+        .st-issue { background: rgba(232, 65, 24, 0.2); color: var(--danger-color); }
+        .st-other { background: rgba(160, 160, 181, 0.2); color: var(--text-muted); }
+
+        .skeleton { background: linear-gradient(90deg, var(--card-bg) 25%, rgba(255,255,255,0.1) 50%, var(--card-bg) 75%); background-size: 200% 100%; animation: loading 1.5s infinite; border-radius: 4px; color: transparent !important; }
+        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* Toast */
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background-color: var(--card-bg); border-left: 4px solid var(--accent-color); color: var(--text-main); padding: 15px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transform: translateX(120%); transition: transform 0.3s ease; }
+        .toast.show { transform: translateX(0); }
+
+        @media (max-width: 1024px) { .sidebar { transform: translateX(-100%); } .main-content { margin-left: 0; } }
+    </style>
+</head>
+<body>
+
+    <div id="toast-container"></div>
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <i class="fa-solid fa-truck-fast"></i> TMS<span>Mini</span>
+        </div>
+        <div class="menu">
+            <a href="dashboard.html" class="menu-item"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+            <a href="fleet.html" class="menu-item"><i class="fa-solid fa-users-gear"></i> Xe & Tài xế</a>
+            <a href="reports.html" class="menu-item active"><i class="fa-solid fa-file-invoice"></i> Báo cáo</a>
+        </div>
+        <div class="sidebar-footer">
+            <button class="btn-logout" id="btn-logout">Đăng xuất</button>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="topbar">
+            <h2 class="page-title">Báo cáo & Lịch sử chuyến đi</h2>
+            <button class="btn-export" id="btn-export" onclick="exportCSV()">
+                <i class="fa-solid fa-download"></i> Xuất CSV
+            </button>
+        </div>
+
+        <div class="filter-section">
+            <div class="form-group">
+                <label>Từ ngày</label>
+                <input type="date" id="filter-start" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>Đến ngày</label>
+                <input type="date" id="filter-end" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>Tài xế</label>
+                <select id="filter-driver" class="form-control">
+                    <option value="ALL">Tất cả tài xế</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Trạng thái</label>
+                <select id="filter-status" class="form-control">
+                    <option value="ALL">Tất cả trạng thái</option>
+                    <option value="Đã giao xong">Đã giao xong</option>
+                    <option value="Sự cố">Sự cố</option>
+                </select>
+            </div>
+            <div class="filter-actions">
+                <button class="btn-filter" onclick="applyFilters()"><i class="fa-solid fa-filter"></i> Lọc</button>
+                <button class="btn-reset" onclick="resetFilters()"><i class="fa-solid fa-rotate-right"></i> Reset</button>
+            </div>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: rgba(0, 168, 255, 0.1); color: #00a8ff;"><i class="fa-solid fa-cubes"></i></div>
+                <div class="kpi-info">
+                    <h3 id="kpi-total-trips" class="skeleton">0</h3>
+                    <p>Tổng số chuyến</p>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: rgba(76, 209, 55, 0.1); color: var(--success-color);"><i class="fa-solid fa-coins"></i></div>
+                <div class="kpi-info">
+                    <h3 id="kpi-total-surcharge" class="skeleton">0</h3>
+                    <p>Tổng phí phụ thu (VNĐ)</p>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: rgba(251, 197, 49, 0.1); color: var(--warning-color);"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                <div class="kpi-info">
+                    <h3 id="kpi-ontime-rate" class="skeleton">0%</h3>
+                    <p>Tỷ lệ giao đúng giờ</p>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: rgba(233, 69, 96, 0.1); color: var(--accent-color);"><i class="fa-solid fa-stopwatch"></i></div>
+                <div class="kpi-info">
+                    <h3 id="kpi-total-hours" class="skeleton">0</h3>
+                    <p>Tổng TG vận chuyển (giờ)</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-section">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Tài xế</th>
+                            <th>Biển số</th>
+                            <th>Điểm đi ➔ Đến</th>
+                            <th>Khách hàng</th>
+                            <th>Loại hàng</th>
+                            <th>Bắt đầu</th>
+                            <th>Kết thúc</th>
+                            <th>Thời gian</th>
+                            <th>Phụ thu</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table-body">
+                        <tr><td colspan="11" class="skeleton">Đang tải dữ liệu...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getDatabase, ref, get, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            databaseURL: "YOUR_DATABASE_URL",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        let allHistoryData = [];
+        let currentFilteredData = [];
+        let driversMap = {}; // uid -> name
+        let fleetMap = {}; // driverId -> plateNumber
+
+        // Auth Guard
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const snapshot = await get(ref(db, 'users/' + user.uid));
+                if (!snapshot.exists() || snapshot.val().role !== 'manager') {
+                    window.location.replace('manager-login.html');
+                } else {
+                    fetchAllData();
+                }
+            } else {
+                window.location.replace('manager-login.html');
+            }
+        });
+
+        document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
+
+        function showToast(msg) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerText = msg;
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
+        }
+
+        async function fetchAllData() {
+            try {
+                // 1. Fetch Drivers cho Map và Dropdown
+                const usersSnap = await get(ref(db, 'users'));
+                const driverSelect = document.getElementById('filter-driver');
+                if (usersSnap.exists()) {
+                    usersSnap.forEach(child => {
+                        const d = child.val();
+                        if(d.role === 'driver') {
+                            driversMap[child.key] = d.name || 'N/A';
+                            driverSelect.innerHTML += `<option value="${child.key}">${d.name}</option>`;
+                        }
+                    });
+                }
+
+                // 2. Fetch Fleet để lấy Biển số dựa trên driverId
+                const fleetSnap = await get(ref(db, 'fleet'));
+                if (fleetSnap.exists()) {
+                    fleetSnap.forEach(child => {
+                        const v = child.val();
+                        if(v.driverId) {
+                            fleetMap[v.driverId] = child.key; // plate
+                        }
+                    });
+                }
+
+                // 3. Lắng nghe Realtime History
+                onValue(ref(db, 'history'), (snapshot) => {
+                    allHistoryData = [];
+                    if (snapshot.exists()) {
+                        // Data structure: /history/{driverUid}/{tripId}
+                        snapshot.forEach(driverChild => {
+                            const driverUid = driverChild.key;
+                            driverChild.forEach(tripChild => {
+                                const trip = tripChild.val();
+                                trip.driverUid = driverUid;
+                                trip.driverName = driversMap[driverUid] || `Tài xế (${driverUid.substring(0,4)})`;
+                                trip.plate = fleetMap[driverUid] || 'Không rõ';
+                                allHistoryData.push(trip);
+                            });
+                        });
+                        // Sort theo thời gian kết thúc (Mới nhất lên đầu)
+                        allHistoryData.sort((a, b) => (b.endTime || 0) - (a.endTime || 0));
+                    }
+                    currentFilteredData = [...allHistoryData];
+                    renderData();
+                });
+
+            } catch (error) {
+                console.error("Lỗi khi tải dữ liệu:", error);
+                showToast("Lỗi khi tải dữ liệu. Vui lòng tải lại trang.");
+            }
+        }
+
+        function formatTime(ms) {
+            if(!ms) return 'N/A';
+            return new Date(ms).toLocaleString('vi-VN', { 
+                year: 'numeric', month: '2-digit', day: '2-digit', 
+                hour: '2-digit', minute: '2-digit' 
+            });
+        }
+
+        function renderData() {
+            // -- RENDER TABLE --
+            const tbody = document.getElementById('history-table-body');
+            tbody.innerHTML = '';
+
+            let totalSurcharge = 0;
+            let totalHours = 0;
+            let onTimeCount = 0;
+            let completedTrips = 0;
+
+            if (currentFilteredData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; color: var(--text-muted);">Không có dữ liệu phù hợp</td></tr>`;
+            } else {
+                currentFilteredData.forEach((t, i) => {
+                    // Logic KPIs
+                    totalSurcharge += Number(t.surcharge || 0);
+                    
+                    let durationText = 'N/A';
+                    if (t.startTime && t.endTime) {
+                        const diffMs = t.endTime - t.startTime;
+                        const diffHrs = diffMs / 3600000;
+                        totalHours += diffHrs;
+                        
+                        const h = Math.floor(diffHrs);
+                        const m = Math.floor((diffMs % 3600000) / 60000);
+                        durationText = `${h}h ${m}m`;
+                    }
+
+                    if (t.status === 'Đã giao xong' || t.status === 'Sự cố') {
+                        completedTrips++;
+                        // Kiểm tra giao đúng giờ (endTime <= eta)
+                        if (t.endTime && t.eta && new Date(t.endTime) <= new Date(t.eta)) {
+                            onTimeCount++;
+                        }
+                    }
+
+                    // DOM Rendering
+                    let statusClass = 'st-other';
+                    if(t.status === 'Đã giao xong') statusClass = 'st-done';
+                    if(t.status === 'Sự cố') statusClass = 'st-issue';
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${i + 1}</td>
+                        <td><strong>${t.driverName}</strong></td>
+                        <td>${t.plate}</td>
+                        <td>${t.startPoint} <i class="fa-solid fa-arrow-right" style="font-size:0.8rem; color:#aaa;"></i> ${t.endPoint}</td>
+                        <td>${t.customerName}</td>
+                        <td>${t.cargoType}</td>
+                        <td>${formatTime(t.startTime)}</td>
+                        <td>${formatTime(t.endTime)}</td>
+                        <td>${durationText}</td>
+                        <td>${Number(t.surcharge || 0).toLocaleString('vi-VN')} đ</td>
+                        <td><span class="status-badge ${statusClass}">${t.status}</span></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            // -- RENDER KPIs --
+            document.querySelectorAll('.skeleton').forEach(el => el.classList.remove('skeleton'));
+            
+            document.getElementById('kpi-total-trips').innerText = currentFilteredData.length;
+            document.getElementById('kpi-total-surcharge').innerText = totalSurcharge.toLocaleString('vi-VN');
+            
+            const onTimeRate = completedTrips > 0 ? ((onTimeCount / completedTrips) * 100).toFixed(1) : 0;
+            document.getElementById('kpi-ontime-rate').innerText = `${onTimeRate}%`;
+            document.getElementById('kpi-total-hours').innerText = totalHours.toFixed(1);
+        }
+
+        // Filters Functions
+        window.applyFilters = () => {
+            const startDate = document.getElementById('filter-start').value;
+            const endDate = document.getElementById('filter-end').value;
+            const driverUid = document.getElementById('filter-driver').value;
+            const status = document.getElementById('filter-status').value;
+
+            let startMs = startDate ? new Date(startDate + "T00:00:00").getTime() : 0;
+            let endMs = endDate ? new Date(endDate + "T23:59:59").getTime() : Infinity;
+
+            currentFilteredData = allHistoryData.filter(t => {
+                const tripTime = t.endTime || t.startTime || 0;
+                const matchDate = tripTime >= startMs && tripTime <= endMs;
+                const matchDriver = driverUid === 'ALL' || t.driverUid === driverUid;
+                const matchStatus = status === 'ALL' || t.status === status;
+                return matchDate && matchDriver && matchStatus;
+            });
+
+            renderData();
+        };
+
+        window.resetFilters = () => {
+            document.getElementById('filter-start').value = '';
+            document.getElementById('filter-end').value = '';
+            document.getElementById('filter-driver').value = 'ALL';
+            document.getElementById('filter-status').value = 'ALL';
+            currentFilteredData = [...allHistoryData];
+            renderData();
+        };
+
+        // Export CSV Function (Có hỗ trợ tiếng Việt)
+        window.exportCSV = () => {
+            if (currentFilteredData.length === 0) {
+                showToast("Không có dữ liệu để xuất!");
+                return;
+            }
+
+            // UTF-8 BOM để Excel đọc được tiếng Việt có dấu
+            let csvContent = "\uFEFF"; 
+            csvContent += "STT,Tài xế,Biển số,Điểm đi,Điểm đến,Khách hàng,Loại hàng,Giờ bắt đầu,Giờ kết thúc,Thời gian,Phụ thu,Trạng thái\n";
+
+            currentFilteredData.forEach((t, i) => {
+                let diffMs = (t.endTime && t.startTime) ? (t.endTime - t.startTime) : 0;
+                let h = Math.floor(diffMs / 3600000);
+                let m = Math.floor((diffMs % 3600000) / 60000);
+                let durationText = diffMs > 0 ? `${h}h ${m}m` : 'N/A';
+
+                // Bọc trong dấu ngoặc kép để tránh lỗi dấu phẩy trong nội dung (VD: Điểm đi có chứa dấu phẩy)
+                const row = [
+                    i + 1,
+                    `"${t.driverName}"`,
+                    `"${t.plate}"`,
+                    `"${t.startPoint}"`,
+                    `"${t.endPoint}"`,
+                    `"${t.customerName}"`,
+                    `"${t.cargoType}"`,
+                    `"${formatTime(t.startTime)}"`,
+                    `"${formatTime(t.endTime)}"`,
+                    `"${durationText}"`,
+                    t.surcharge || 0,
+                    `"${t.status}"`
+                ];
+                csvContent += row.join(",") + "\n";
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `TMS_BaoCao_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+
+    </script>
+</body>
+</html>
