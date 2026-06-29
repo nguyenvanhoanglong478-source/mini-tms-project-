@@ -6,43 +6,59 @@ const btnStop = document.getElementById('btnStop');
 const statusMessage = document.getElementById('status-message');
 const statusSelect = document.getElementById('vehicleStatus');
 
+// Mảng chứa danh sách ID phần tử input để dễ dàng khóa/mở khóa
+const inputIds = ['vehicleId', 'driverName', 'startLocation', 'endLocation', 'customerName', 'cargoType', 'deliveryTime', 'surcharge'];
 let watchId = null;
 
 btnStart.addEventListener('click', () => {
     const vId = document.getElementById('vehicleId').value.trim().toUpperCase();
     const dName = document.getElementById('driverName').value.trim();
+    const startLoc = document.getElementById('startLocation').value.trim();
+    const endLoc = document.getElementById('endLocation').value.trim();
+    const custName = document.getElementById('customerName').value.trim();
+    const cargo = document.getElementById('cargoType').value;
+    const delTime = document.getElementById('deliveryTime').value;
+    const extraFee = document.getElementById('surcharge').value.trim();
 
-    if (!vId || !dName) {
-        alert("Vui lòng nhập đầy đủ Mã xe và Tên tài xế!");
+    // Kiểm tra tính hợp lệ dữ liệu (bắt buộc nhập trừ Phí phụ thu)
+    if (!vId || !dName || !startLoc || !endLoc || !custName || !delTime) {
+        alert("Vui lòng nhập đầy đủ tất cả thông tin chuyến đi!");
         return;
     }
 
     if (!navigator.geolocation) {
-        alert("Trình duyệt của bạn không hỗ trợ Geolocation (GPS).");
+        alert("Trình duyệt không hỗ trợ định vị GPS.");
         return;
     }
 
-    document.getElementById('vehicleId').disabled = true;
-    document.getElementById('driverName').disabled = true;
+    // Khóa tất cả các trường nhập liệu khi chuyến đi bắt đầu
+    inputIds.forEach(id => document.getElementById(id).disabled = true);
     btnStart.disabled = true;
     btnStop.disabled = false;
-    statusMessage.innerText = "Đang xin quyền vị trí...";
+    statusMessage.innerText = "Đang kết nối GPS vệ tinh...";
 
-    const options = { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 };
+    const options = { enableHighAccuracy: true, maximumAge: 0, timeout: 8000 };
 
     watchId = navigator.geolocation.watchPosition(
         (position) => {
             const lat = position.coords.latitude;
             const lng = position.coords.longitude;
             const speed = position.coords.speed ? (position.coords.speed * 3.6).toFixed(1) : 0;
-            
             const currentStatus = statusSelect.value;
-            statusMessage.innerText = `Đang gửi vị trí... (Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)})`;
+            
+            statusMessage.innerText = `Đang gửi dữ liệu... (Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)})`;
 
             const vehicleRef = ref(db, `vehicles/${vId}`);
             
+            // Gửi cấu trúc thông tin tích hợp theo đúng yêu cầu bài tập
             update(vehicleRef, {
                 driverName: dName,
+                startLocation: startLoc,
+                endLocation: endLoc,
+                customerName: custName,
+                cargoType: cargo,
+                deliveryTime: delTime,
+                surcharge: extraFee ? Number(extraFee) : 0,
                 status: currentStatus,
                 lat: lat,
                 lng: lng,
@@ -50,6 +66,7 @@ btnStart.addEventListener('click', () => {
                 lastUpdate: Date.now()
             });
 
+            // Lưu lịch sử đường đi (chỉ lưu tọa độ để vẽ polyline gọn nhẹ)
             if (currentStatus === "Đang giao hàng") {
                  push(ref(db, `vehicles/${vId}/history`), { lat, lng });
             }
@@ -62,6 +79,7 @@ btnStart.addEventListener('click', () => {
     );
 });
 
+// Cập nhật nhanh trạng thái khi tài xế thay đổi dropdown
 statusSelect.addEventListener('change', () => {
     if(watchId) {
         const vId = document.getElementById('vehicleId').value.trim().toUpperCase();
@@ -78,9 +96,9 @@ btnStop.addEventListener('click', () => {
     const vId = document.getElementById('vehicleId').value.trim().toUpperCase();
     update(ref(db, `vehicles/${vId}`), { status: "Ngừng hoạt động" });
 
-    document.getElementById('vehicleId').disabled = false;
-    document.getElementById('driverName').disabled = false;
+    // Mở khóa lại form nhập liệu
+    inputIds.forEach(id => document.getElementById(id).disabled = false);
     btnStart.disabled = false;
     btnStop.disabled = true;
-    statusMessage.innerText = "Đã dừng chuyến đi.";
+    statusMessage.innerText = "Đã hoàn thành/Dừng chuyến đi.";
 });
