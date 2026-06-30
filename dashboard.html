@@ -1,386 +1,343 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Quản lý - TMS Mini v2.0</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-
-    <style>
-        :root {
-            color-scheme: dark; /* Thêm color-scheme cho theme tối mặc định */
-            
-            /* Dark Theme (Default) */
-            --bg-color: #1a1a2e;
-            --sidebar-bg: #111827;
-            --card-bg: #16213e;
-            --accent-color: #e94560;
-            --text-main: #ffffff;
-            --text-muted: #a0a0b5;
-            --border-color: rgba(255, 255, 255, 0.1);
-            
-            /* Status Colors */
-            --status-driving: #4cd137;
-            --status-pause: #fbc531;
-            --status-issue: #e84118;
-            --status-done: #718093;
-            --status-waiting: #00a8ff;
-        }
-
-        /* Light Theme */
-        body.light-theme {
-            color-scheme: light; /* Thêm color-scheme cho theme sáng */
-            
-            --bg-color: #f3f4f6;
-            --sidebar-bg: #ffffff;
-            --card-bg: #ffffff;
-            --text-main: #1f2937;
-            --text-muted: #6b7280;
-            --border-color: #e5e7eb;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            display: flex;
-            min-height: 100vh;
-            overflow-x: hidden;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            width: 260px;
-            background-color: var(--sidebar-bg);
-            border-right: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            height: 100vh;
-            transition: transform 0.3s ease;
-            z-index: 1000;
-        }
-
-        .sidebar-header {
-            padding: 20px;
-            font-size: 1.5rem;
-            font-weight: 700;
-            text-align: center;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        .sidebar-header span { color: var(--accent-color); }
-
-        .menu { flex: 1; padding: 20px 0; }
-        .menu-item {
-            padding: 15px 25px;
-            display: flex; align-items: center; gap: 15px;
-            color: var(--text-muted);
-            text-decoration: none;
-            transition: all 0.2s;
-            position: relative;
-        }
-        .menu-item:hover, .menu-item.active {
-            background-color: rgba(233, 69, 96, 0.1);
-            color: var(--accent-color);
-            border-right: 3px solid var(--accent-color);
-        }
-        .badge {
-            background-color: var(--status-issue);
-            color: white; font-size: 0.75rem;
-            padding: 2px 6px; border-radius: 10px;
-            margin-left: auto; display: none;
-        }
-
-        .sidebar-footer { padding: 20px; border-top: 1px solid var(--border-color); }
-        .btn-logout {
-            width: 100%; padding: 12px; background: none;
-            border: 1px solid var(--status-issue);
-            color: var(--status-issue); border-radius: 8px;
-            cursor: pointer; font-family: 'Inter', sans-serif;
-            transition: 0.2s;
-        }
-        .btn-logout:hover { background: var(--status-issue); color: white; }
-
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            margin-left: 260px;
-            padding: 20px 30px;
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-            transition: margin-left 0.3s;
-        }
-
-        /* Topbar */
-        .topbar {
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .topbar-left { display: flex; align-items: center; gap: 15px; }
-        .menu-toggle {
-            display: none; background: none; border: none;
-            color: var(--text-main); font-size: 1.5rem; cursor: pointer;
-        }
-        
-        .theme-toggle {
-            background: var(--card-bg); border: 1px solid var(--border-color);
-            color: var(--text-main); padding: 8px 15px; border-radius: 20px;
-            cursor: pointer; display: flex; gap: 8px; align-items: center;
-        }
-
-        /* KPIs */
-        .kpi-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;
-        }
-        .kpi-card {
-            background-color: var(--card-bg); border-radius: 12px;
-            padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            border: 1px solid var(--border-color);
-            display: flex; align-items: center; gap: 15px;
-        }
-        .kpi-icon {
-            width: 50px; height: 50px; border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.5rem;
-        }
-        .kpi-info h3 { font-size: 1.8rem; font-weight: 700; margin-bottom: 5px; }
-        .kpi-info p { color: var(--text-muted); font-size: 0.9rem; }
-        
-        /* Cảnh báo KPI */
-        .kpi-card.alert-card { border-color: var(--status-issue); }
-        .kpi-card.alert-card .kpi-icon { background-color: rgba(232, 65, 24, 0.1); color: var(--status-issue); }
-
-        /* Map Section */
-        .map-section {
-            background-color: var(--card-bg); border-radius: 12px;
-            border: 1px solid var(--border-color); overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-        .section-header {
-            padding: 15px 20px; border-bottom: 1px solid var(--border-color);
-            font-weight: 600; display: flex; justify-content: space-between; align-items: center;
-        }
-        #map { height: 400px; width: 100%; z-index: 1; }
-        
-        /* Custom Map Marker */
-        .custom-marker {
-            width: 30px; height: 30px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            color: white; border: 2px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            font-size: 12px;
-        }
-        .marker-pulse {
-            animation: pulseWarning 1.5s infinite;
-        }
-        @keyframes pulseWarning {
-            0% { box-shadow: 0 0 0 0 rgba(232, 65, 24, 0.7); }
-            70% { box-shadow: 0 0 0 15px rgba(232, 65, 24, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(232, 65, 24, 0); }
-        }
-
-        /* Table Section */
-        .table-section {
-            background-color: var(--card-bg); border-radius: 12px;
-            border: 1px solid var(--border-color); overflow: hidden;
-        }
-        .table-controls {
-            padding: 15px 20px; display: flex; gap: 15px; flex-wrap: wrap;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .control-input {
-            padding: 8px 12px; background: rgba(255,255,255,0.05);
-            border: 1px solid var(--border-color); border-radius: 6px;
-            color: var(--text-main); font-family: inherit; outline: none;
-        }
-        
-        .table-wrapper { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th, td { padding: 12px 20px; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
-        th { color: var(--text-muted); font-weight: 500; font-size: 0.9rem; }
-        
-        .status-badge {
-            padding: 4px 8px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;
-        }
-        .st-driving { background: rgba(76, 209, 55, 0.2); color: var(--status-driving); }
-        .st-pause { background: rgba(251, 197, 49, 0.2); color: var(--status-pause); }
-        .st-issue { background: rgba(232, 65, 24, 0.2); color: var(--status-issue); }
-        .st-done { background: rgba(113, 128, 147, 0.2); color: var(--status-done); }
-        .st-waiting { background: rgba(0, 168, 255, 0.2); color: var(--status-waiting); }
-
-        .btn-action {
-            background: none; border: none; cursor: pointer;
-            padding: 5px; margin-right: 5px; font-size: 1rem; color: var(--text-muted);
-            transition: color 0.2s;
-        }
-        .btn-action:hover { color: var(--accent-color); }
-        .btn-warn:hover { color: var(--status-issue); }
-
-        /* Skeleton Loading */
-        .skeleton {
-            background: linear-gradient(90deg, var(--card-bg) 25%, rgba(255,255,255,0.1) 50%, var(--card-bg) 75%);
-            background-size: 200% 100%; animation: loading 1.5s infinite;
-            border-radius: 4px; color: transparent !important;
-        }
-        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-
-        /* Toast */
-        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-        .toast {
-            background-color: var(--card-bg); border-left: 4px solid var(--accent-color);
-            color: var(--text-main); padding: 15px; border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3); transform: translateX(120%);
-            transition: transform 0.3s ease;
-        }
-        .toast.show { transform: translateX(0); }
-
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .sidebar { transform: translateX(-100%); }
-            .sidebar.active { transform: translateX(0); }
-            .main-content { margin-left: 0; }
-            .menu-toggle { display: block; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Quản lý - TMS Mini v2.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<style>
+:root {
+  --bg-color: #f4f6f9;
+  --sidebar-bg: #ffffff;
+  --card-bg: #ffffff;
+  --accent-color: #e94560;
+  --text-main: #1a1a2e;
+  --text-muted: #6b7280;
+  --border-color: #e5e7eb;
+  /* Status Colors */
+  --status-driving: #2ecc71;
+  --status-pause: #f39c12;
+  --status-issue: #e74c3c;
+  --status-done: #9ca3af;
+  --status-waiting: #3498db;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  display: flex;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+/* Sidebar */
+.sidebar {
+  width: 260px;
+  background-color: var(--sidebar-bg);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  height: 100vh;
+  transition: transform 0.3s ease;
+  z-index: 1000;
+}
+.sidebar-header {
+  padding: 20px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.sidebar-header span { color: var(--accent-color); }
+.menu { flex: 1; padding: 20px 0; }
+.menu-item {
+  padding: 15px 25px;
+  display: flex; align-items: center; gap: 15px;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: all 0.2s;
+  position: relative;
+}
+.menu-item:hover, .menu-item.active {
+  background-color: rgba(233, 69, 96, 0.08);
+  color: var(--accent-color);
+  border-right: 3px solid var(--accent-color);
+}
+.badge {
+  background-color: var(--status-issue);
+  color: white; font-size: 0.75rem;
+  padding: 2px 6px; border-radius: 10px;
+  margin-left: auto; display: none;
+}
+.sidebar-footer { padding: 20px; border-top: 1px solid var(--border-color); }
+.btn-logout {
+  width: 100%; padding: 12px; background: none;
+  border: 1px solid var(--status-issue);
+  color: var(--status-issue); border-radius: 8px;
+  cursor: pointer; font-family: 'Inter', sans-serif;
+  transition: 0.2s;
+}
+.btn-logout:hover { background: var(--status-issue); color: white; }
+/* Main Content */
+.main-content {
+  flex: 1;
+  margin-left: 260px;
+  padding: 20px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  transition: margin-left 0.3s;
+}
+/* Topbar */
+.topbar {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.topbar-left { display: flex; align-items: center; gap: 15px; }
+.menu-toggle {
+  display: none; background: none; border: none;
+  color: var(--text-main); font-size: 1.5rem; cursor: pointer;
+}
+/* KPIs */
+.kpi-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;
+}
+.kpi-card {
+  background-color: var(--card-bg); border-radius: 12px;
+  padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  border: 1px solid var(--border-color);
+  display: flex; align-items: center; gap: 15px;
+}
+.kpi-icon {
+  width: 50px; height: 50px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+}
+.kpi-info h3 { font-size: 1.8rem; font-weight: 700; margin-bottom: 5px; }
+.kpi-info p { color: var(--text-muted); font-size: 0.9rem; }
+.kpi-card.alert-card { border-color: var(--status-issue); }
+.kpi-card.alert-card .kpi-icon { background-color: rgba(231, 76, 60, 0.1); color: var(--status-issue); }
+/* Map Section */
+.map-section {
+  background-color: var(--card-bg); border-radius: 12px;
+  border: 1px solid var(--border-color); overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.section-header {
+  padding: 15px 20px; border-bottom: 1px solid var(--border-color);
+  font-weight: 600; display: flex; justify-content: space-between; align-items: center;
+}
+#map { height: 400px; width: 100%; z-index: 1; }
+.custom-marker {
+  width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: white; border: 2px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  font-size: 12px;
+}
+.marker-pulse {
+  animation: pulseWarning 1.5s infinite;
+}
+@keyframes pulseWarning {
+  0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.6); }
+  70% { box-shadow: 0 0 0 15px rgba(231, 76, 60, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+}
+/* Table Section */
+.table-section {
+  background-color: var(--card-bg); border-radius: 12px;
+  border: 1px solid var(--border-color); overflow: hidden;
+}
+.table-controls {
+  padding: 15px 20px; display: flex; gap: 15px; flex-wrap: wrap;
+  border-bottom: 1px solid var(--border-color);
+}
+.control-input {
+  padding: 8px 12px; background: #f9fafb;
+  border: 1px solid var(--border-color); border-radius: 6px;
+  color: var(--text-main); font-family: inherit; outline: none;
+}
+/* Fix dropdown sáng/tối: option luôn có màu tường minh */
+select.control-input {
+  color: var(--text-main);
+  background-color: #f9fafb;
+}
+select.control-input option {
+  color: var(--text-main);
+  background-color: #ffffff;
+}
+.table-wrapper { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; text-align: left; }
+th, td { padding: 12px 20px; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
+th { color: var(--text-muted); font-weight: 500; font-size: 0.9rem; }
+.status-badge {
+  padding: 4px 8px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;
+}
+.st-driving { background: rgba(46, 204, 113, 0.15); color: var(--status-driving); }
+.st-pause { background: rgba(243, 156, 18, 0.15); color: var(--status-pause); }
+.st-issue { background: rgba(231, 76, 60, 0.15); color: var(--status-issue); }
+.st-done { background: rgba(156, 163, 175, 0.15); color: #6b7280; }
+.st-waiting { background: rgba(52, 152, 219, 0.15); color: var(--status-waiting); }
+.btn-action {
+  background: none; border: none; cursor: pointer;
+  padding: 5px; margin-right: 5px; font-size: 1rem; color: var(--text-muted);
+  transition: color 0.2s;
+}
+.btn-action:hover { color: var(--accent-color); }
+.btn-warn:hover { color: var(--status-issue); }
+/* Skeleton Loading */
+.skeleton {
+  background: linear-gradient(90deg, #eef0f3 25%, #f7f8fa 50%, #eef0f3 75%);
+  background-size: 200% 100%; animation: loading 1.5s infinite;
+  border-radius: 4px; color: transparent !important;
+}
+@keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+/* Toast */
+#toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+.toast {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--accent-color);
+  color: var(--text-main); padding: 15px; border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.12); transform: translateX(120%);
+  transition: transform 0.3s ease;
+}
+.toast.show { transform: translateX(0); }
+/* Responsive */
+@media (max-width: 1024px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.active { transform: translateX(0); }
+  .main-content { margin-left: 0; }
+  .menu-toggle { display: block; }
+}
+</style>
 </head>
 <body>
+<div id="toast-container"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <i class="fa-solid fa-truck-fast"></i> TMS<span>Mini</span>
+  </div>
+  <div class="menu">
+    <a href="dashboard.html" class="menu-item active">
+      <i class="fa-solid fa-chart-pie"></i> Dashboard
+    </a>
+    <a href="fleet.html" class="menu-item">
+      <i class="fa-solid fa-users-gear"></i> Xe & Tài xế
+      <span class="badge" id="issue-badge">0</span>
+    </a>
+    <a href="reports.html" class="menu-item">
+      <i class="fa-solid fa-file-invoice"></i> Báo cáo
+    </a>
+  </div>
+  <div class="sidebar-footer">
+    <button class="btn-logout" id="btn-logout">Đăng xuất</button>
+  </div>
+</aside>
 
-    <div id="toast-container"></div>
+<main class="main-content">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" id="menu-toggle"><i class="fa-solid fa-bars"></i></button>
+      <h2>Tổng quan hệ thống</h2>
+    </div>
+  </div>
 
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <i class="fa-solid fa-truck-fast"></i> TMS<span>Mini</span>
-        </div>
-        <div class="menu">
-            <a href="dashboard.html" class="menu-item active">
-                <i class="fa-solid fa-chart-pie"></i> Dashboard
-            </a>
-            <a href="fleet.html" class="menu-item">
-                <i class="fa-solid fa-users-gear"></i> Xe & Tài xế
-                <span class="badge" id="issue-badge">0</span>
-            </a>
-            <a href="reports.html" class="menu-item">
-                <i class="fa-solid fa-file-invoice"></i> Báo cáo
-            </a>
-        </div>
-        <div class="sidebar-footer">
-            <button class="btn-logout" id="btn-logout">Đăng xuất</button>
-        </div>
-    </aside>
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background: rgba(52, 152, 219, 0.1); color: var(--status-waiting);">
+        <i class="fa-solid fa-truck"></i>
+      </div>
+      <div class="kpi-info">
+        <h3 id="kpi-active" class="skeleton">00</h3>
+        <p>Xe đang hoạt động</p>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background: rgba(46, 204, 113, 0.1); color: var(--status-driving);">
+        <i class="fa-solid fa-route"></i>
+      </div>
+      <div class="kpi-info">
+        <h3 id="kpi-trips" class="skeleton">00</h3>
+        <p>Chuyến trong ngày</p>
+      </div>
+    </div>
+    <div class="kpi-card" id="kpi-issue-card">
+      <div class="kpi-icon" style="background: rgba(231, 76, 60, 0.1); color: var(--status-issue);">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <div class="kpi-info">
+        <h3 id="kpi-issues" class="skeleton">00</h3>
+        <p>Xe đang có sự cố</p>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background: rgba(243, 156, 18, 0.1); color: var(--status-pause);">
+        <i class="fa-solid fa-money-bill-wave"></i>
+      </div>
+      <div class="kpi-info">
+        <h3 id="kpi-revenue" class="skeleton">0</h3>
+        <p>Phụ thu hôm nay (VNĐ)</p>
+      </div>
+    </div>
+  </div>
 
-    <main class="main-content">
-        <div class="topbar">
-            <div class="topbar-left">
-                <button class="menu-toggle" id="menu-toggle"><i class="fa-solid fa-bars"></i></button>
-                <h2>Tổng quan hệ thống</h2>
-            </div>
-            <button class="theme-toggle" id="theme-toggle">
-                <i class="fa-solid fa-moon"></i> Giao diện
-            </button>
-        </div>
+  <div class="map-section">
+    <div class="section-header">
+      <span><i class="fa-solid fa-map-location-dot"></i> Bản đồ thời gian thực</span>
+      <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: normal;">Cập nhật liên tục</span>
+    </div>
+    <div id="map"></div>
+  </div>
 
-        <div class="kpi-grid">
-            <div class="kpi-card">
-                <div class="kpi-icon" style="background: rgba(0, 168, 255, 0.1); color: var(--status-waiting);">
-                    <i class="fa-solid fa-truck"></i>
-                </div>
-                <div class="kpi-info">
-                    <h3 id="kpi-active" class="skeleton">00</h3>
-                    <p>Xe đang hoạt động</p>
-                </div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-icon" style="background: rgba(76, 209, 55, 0.1); color: var(--status-driving);">
-                    <i class="fa-solid fa-route"></i>
-                </div>
-                <div class="kpi-info">
-                    <h3 id="kpi-trips" class="skeleton">00</h3>
-                    <p>Chuyến trong ngày</p>
-                </div>
-            </div>
-            <div class="kpi-card" id="kpi-issue-card">
-                <div class="kpi-icon" style="background: rgba(232, 65, 24, 0.1); color: var(--status-issue);">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                </div>
-                <div class="kpi-info">
-                    <h3 id="kpi-issues" class="skeleton">00</h3>
-                    <p>Xe đang có sự cố</p>
-                </div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-icon" style="background: rgba(251, 197, 49, 0.1); color: var(--status-pause);">
-                    <i class="fa-solid fa-money-bill-wave"></i>
-                </div>
-                <div class="kpi-info">
-                    <h3 id="kpi-revenue" class="skeleton">0</h3>
-                    <p>Phụ thu hôm nay (VNĐ)</p>
-                </div>
-            </div>
-        </div>
+  <div class="table-section">
+    <div class="table-controls">
+      <input type="text" id="search-input" class="control-input" placeholder="Tìm biển số, tài xế..." style="flex: 1; min-width: 200px;">
+      <select id="status-filter" class="control-input">
+        <option value="ALL">Tất cả trạng thái</option>
+        <option value="Đang giao">Đang giao</option>
+        <option value="Chờ lấy hàng">Chờ lấy hàng</option>
+        <option value="Tạm dừng">Tạm dừng</option>
+        <option value="Sự cố">Sự cố</option>
+      </select>
+    </div>
+    <div class="table-wrapper">
+      <table id="fleet-table">
+        <thead>
+          <tr>
+            <th>Biển số (ID)</th>
+            <th>Tài xế</th>
+            <th>Tuyến (Đi ➔ Đến)</th>
+            <th>Loại hàng</th>
+            <th>Giờ giao</th>
+            <th>Trạng thái</th>
+            <th>Phụ thu</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <tr><td colspan="8" class="skeleton">Loading...</td></tr>
+          <tr><td colspan="8" class="skeleton">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
 
-        <div class="map-section">
-            <div class="section-header">
-                <span><i class="fa-solid fa-map-location-dot"></i> Bản đồ thời gian thực</span>
-                <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: normal;">Cập nhật liên tục</span>
-            </div>
-            <div id="map"></div>
-        </div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-        <div class="table-section">
-            <div class="table-controls">
-                <input type="text" id="search-input" class="control-input" placeholder="Tìm biển số, tài xế..." style="flex: 1; min-width: 200px;">
-                <select id="status-filter" class="control-input">
-                    <option value="ALL">Tất cả trạng thái</option>
-                    <option value="Đang giao">Đang giao</option>
-                    <option value="Chờ lấy hàng">Chờ lấy hàng</option>
-                    <option value="Tạm dừng">Tạm dừng</option>
-                    <option value="Sự cố">Sự cố</option>
-                </select>
-            </div>
-            <div class="table-wrapper">
-                <table id="fleet-table">
-                    <thead>
-                        <tr>
-                            <th>Biển số (ID)</th>
-                            <th>Tài xế</th>
-                            <th>Tuyến (Đi ➔ Đến)</th>
-                            <th>Loại hàng</th>
-                            <th>Giờ giao</th>
-                            <th>Trạng thái</th>
-                            <th>Phụ thu</th>
-                            <th>Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-body">
-                        <tr><td colspan="8" class="skeleton">Loading...</td></tr>
-                        <tr><td colspan="8" class="skeleton">Loading...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </main>
-
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
-
-        const firebaseConfig = {
+const firebaseConfig = {
   apiKey: "AIzaSyDtPkeLFdZqviWfinIMzdHxRHuv47TvUjY",
   authDomain: "mini-tsm-projectv2.firebaseapp.com",
   databaseURL: "https://mini-tsm-projectv2-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -390,249 +347,226 @@
   appId: "1:535774659933:web:600122096d9dea2f5514b4"
 };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
+// App riêng cho ManagerApp, để session độc lập với DriverApp
+const app = initializeApp(firebaseConfig, "ManagerApp");
+const auth = getAuth(app);
+const db = getDatabase(app);
 
-        // UI Interactions
-        const sidebar = document.getElementById('sidebar');
-        const menuToggle = document.getElementById('menu-toggle');
-        const themeToggle = document.getElementById('theme-toggle');
-        const toastContainer = document.getElementById('toast-container');
+// UI Interactions
+const sidebar = document.getElementById('sidebar');
+const menuToggle = document.getElementById('menu-toggle');
+const toastContainer = document.getElementById('toast-container');
 
-        menuToggle.addEventListener('click', () => sidebar.classList.toggle('active'));
-        
-        // Theme logic
-        if(localStorage.getItem('tms_theme') === 'light') document.body.classList.add('light-theme');
-        themeToggle.addEventListener('click', () => {
-            document.body.classList.toggle('light-theme');
-            localStorage.setItem('tms_theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
-        });
+menuToggle.addEventListener('click', () => sidebar.classList.toggle('active'));
 
-        function showToast(msg, type = 'info') {
-            const colors = { info: 'var(--accent-color)', warning: 'var(--status-pause)', error: 'var(--status-issue)' };
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.style.borderLeftColor = colors[type] || colors.info;
-            toast.innerHTML = msg;
-            toastContainer.appendChild(toast);
-            setTimeout(() => toast.classList.add('show'), 10);
-            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 4000);
-        }
+function showToast(msg, type = 'info') {
+  const colors = { info: 'var(--accent-color)', warning: 'var(--status-pause)', error: 'var(--status-issue)' };
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.style.borderLeftColor = colors[type] || colors.info;
+  toast.innerHTML = msg;
+  toastContainer.appendChild(toast);
+  setTimeout(() => toast.classList.add('show'), 10);
+  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 4000);
+}
 
-        // Map Initialization
-        const map = L.map('map').setView([10.762622, 106.660172], 12); // Default HCM City
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap TMS Mini',
-            maxZoom: 19
-        }).addTo(map);
+// Map Initialization
+const map = L.map('map').setView([10.762622, 106.660172], 12); // Default HCM City
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap TMS Mini',
+  maxZoom: 19
+}).addTo(map);
 
-        // Data Management
-        let fleetData = [];
-        let markers = {};
+// Data Management
+let fleetData = [];
+let markers = {};
 
-        // Auth Guard
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const userRef = ref(db, 'users/' + user.uid);
-                const snapshot = await get(userRef);
-                if (!snapshot.exists() || snapshot.val().role !== 'manager') {
-                    await signOut(auth);
-                    window.location.replace('manager-login.html');
-                } else {
-                    startRealtimeListener(); // Kích hoạt lắng nghe dữ liệu khi Auth OK
-                }
-            } else {
-                window.location.replace('manager-login.html');
-            }
-        });
+// Auth Guard
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    const userRef = ref(db, 'users/' + user.uid);
+    const snapshot = await get(userRef);
+    if (!snapshot.exists() || snapshot.val().role !== 'manager') {
+      await signOut(auth);
+      window.location.replace('manager-login.html');
+    } else {
+      startRealtimeListener();
+    }
+  } else {
+    window.location.replace('manager-login.html');
+  }
+});
 
-        document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
+document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
 
-        // Data Fetching & Processing
-        function startRealtimeListener() {
-            const vehiclesRef = ref(db, 'vehicles');
-            onValue(vehiclesRef, (snapshot) => {
-                fleetData = [];
-                if (snapshot.exists()) {
-                    snapshot.forEach((child) => {
-                        const uid = child.key;
-                        const data = child.val();
-                        // Giả lập Biển số bằng UID slice
-                        data.uid = uid;
-                        data.plate = `51C-${uid.substring(0, 5).toUpperCase()}`;
-                        fleetData.push(data);
-                    });
-                }
-                updateDashboard();
-            });
-        }
+// Data Fetching & Processing
+function startRealtimeListener() {
+  const vehiclesRef = ref(db, 'vehicles');
+  onValue(vehiclesRef, (snapshot) => {
+    fleetData = [];
+    if (snapshot.exists()) {
+      snapshot.forEach((child) => {
+        const uid = child.key;
+        const data = child.val();
+        data.uid = uid;
+        data.plate = `51C-${uid.substring(0, 5).toUpperCase()}`;
+        fleetData.push(data);
+      });
+    }
+    updateDashboard();
+  });
+}
 
-        // Cập nhật toàn bộ Dashboard
-        function updateDashboard() {
-            renderKPIs();
-            renderMap();
-            renderTable();
-        }
+function updateDashboard() {
+  renderKPIs();
+  renderMap();
+  renderTable();
+}
 
-        function getStatusColor(status) {
-            switch(status) {
-                case 'Đang giao': return 'var(--status-driving)';
-                case 'Tạm dừng': return 'var(--status-pause)';
-                case 'Sự cố': return 'var(--status-issue)';
-                case 'Chờ lấy hàng': return 'var(--status-waiting)';
-                default: return 'var(--status-done)';
-            }
-        }
+function getStatusColor(status) {
+  switch (status) {
+    case 'Đang giao': return 'var(--status-driving)';
+    case 'Tạm dừng': return 'var(--status-pause)';
+    case 'Sự cố': return 'var(--status-issue)';
+    case 'Chờ lấy hàng': return 'var(--status-waiting)';
+    default: return 'var(--status-done)';
+  }
+}
 
-        function getStatusClass(status) {
-            switch(status) {
-                case 'Đang giao': return 'st-driving';
-                case 'Tạm dừng': return 'st-pause';
-                case 'Sự cố': return 'st-issue';
-                case 'Chờ lấy hàng': return 'st-waiting';
-                default: return 'st-done';
-            }
-        }
+function getStatusClass(status) {
+  switch (status) {
+    case 'Đang giao': return 'st-driving';
+    case 'Tạm dừng': return 'st-pause';
+    case 'Sự cố': return 'st-issue';
+    case 'Chờ lấy hàng': return 'st-waiting';
+    default: return 'st-done';
+  }
+}
 
-        function renderKPIs() {
-            let active = fleetData.length;
-            let issues = 0;
-            let revenue = 0;
+function renderKPIs() {
+  let active = fleetData.length;
+  let issues = 0;
+  let revenue = 0;
 
-            fleetData.forEach(v => {
-                if(v.status === 'Sự cố') issues++;
-                revenue += parseInt(v.surcharge) || 0;
-            });
+  fleetData.forEach(v => {
+    if (v.status === 'Sự cố') issues++;
+    revenue += parseInt(v.surcharge) || 0;
+  });
 
-            // Loại bỏ class skeleton
-            document.querySelectorAll('.skeleton').forEach(el => el.classList.remove('skeleton'));
+  document.querySelectorAll('.skeleton').forEach(el => el.classList.remove('skeleton'));
+  document.getElementById('kpi-active').innerText = active;
+  document.getElementById('kpi-trips').innerText = active;
+  document.getElementById('kpi-issues').innerText = issues;
+  document.getElementById('kpi-revenue').innerText = revenue.toLocaleString('vi-VN');
 
-            document.getElementById('kpi-active').innerText = active;
-            document.getElementById('kpi-trips').innerText = active; // Chuyến trong ngày hiện tại lấy tạm = active
-            document.getElementById('kpi-issues').innerText = issues;
-            document.getElementById('kpi-revenue').innerText = revenue.toLocaleString('vi-VN');
+  const issueCard = document.getElementById('kpi-issue-card');
+  const issueBadge = document.getElementById('issue-badge');
+  if (issues > 0) {
+    issueCard.classList.add('alert-card');
+    issueBadge.style.display = 'inline-block';
+    issueBadge.innerText = issues;
+  } else {
+    issueCard.classList.remove('alert-card');
+    issueBadge.style.display = 'none';
+  }
+}
 
-            // Cảnh báo UI nếu có sự cố
-            const issueCard = document.getElementById('kpi-issue-card');
-            const issueBadge = document.getElementById('issue-badge');
-            
-            if(issues > 0) {
-                issueCard.classList.add('alert-card');
-                issueBadge.style.display = 'inline-block';
-                issueBadge.innerText = issues;
-            } else {
-                issueCard.classList.remove('alert-card');
-                issueBadge.style.display = 'none';
-            }
-        }
+function renderMap() {
+  const activeUIDs = fleetData.map(v => v.uid);
+  for (let uid in markers) {
+    if (!activeUIDs.includes(uid)) {
+      map.removeLayer(markers[uid]);
+      delete markers[uid];
+    }
+  }
 
-        function renderMap() {
-            const activeUIDs = fleetData.map(v => v.uid);
+  fleetData.forEach(v => {
+    if (!v.location || !v.location.lat) return;
+    const isOffline = (Date.now() - v.lastUpdated) > (5 * 60 * 1000);
+    const isOverdue = new Date() > new Date(v.eta);
+    const isWarning = v.status === 'Sự cố' || isOffline || isOverdue;
 
-            // Xóa marker cũ nếu xe không còn online
-            for (let uid in markers) {
-                if (!activeUIDs.includes(uid)) {
-                    map.removeLayer(markers[uid]);
-                    delete markers[uid];
-                }
-            }
+    let iconHtml = `<div class="custom-marker ${isWarning ? 'marker-pulse' : ''}" style="background-color: ${getStatusColor(v.status)};">
+      <i class="fa-solid fa-truck"></i>
+    </div>`;
+    const customIcon = L.divIcon({ html: iconHtml, className: '', iconSize: [30, 30], iconAnchor: [15, 15] });
 
-            fleetData.forEach(v => {
-                if(!v.location || !v.location.lat) return;
+    const popupContent = `
+      <div style="font-family:'Inter', sans-serif;">
+        <b style="font-size:1.1rem; color: #1a1a2e;">${v.plate}</b><br>
+        <span style="color:#6b7280; font-size:0.9rem;">Khách hàng: ${v.customerName}</span><hr style="margin:5px 0;">
+        <b>Tuyến:</b> ${v.startPoint} ➔ ${v.endPoint}<br>
+        <b>Trạng thái:</b> ${v.status} ${isOffline ? '<span style="color:#e74c3c">(Mất tín hiệu GPS)</span>' : ''}<br>
+        <b>Tốc độ:</b> ${v.location.speed || 0} km/h<br>
+        <b>Giờ giao:</b> ${new Date(v.eta).toLocaleString('vi-VN')}
+      </div>
+    `;
 
-                // Cảnh báo Logic: > 5 phút mất tín hiệu HOẶC quá giờ
-                const isOffline = (Date.now() - v.lastUpdated) > (5 * 60 * 1000);
-                const isOverdue = new Date() > new Date(v.eta);
-                const isWarning = v.status === 'Sự cố' || isOffline || isOverdue;
+    if (markers[v.uid]) {
+      markers[v.uid].setLatLng([v.location.lat, v.location.lng]);
+      markers[v.uid].setIcon(customIcon);
+      markers[v.uid].setPopupContent(popupContent);
+    } else {
+      markers[v.uid] = L.marker([v.location.lat, v.location.lng], { icon: customIcon })
+        .bindPopup(popupContent)
+        .addTo(map);
+    }
+  });
+}
 
-                let iconHtml = `<div class="custom-marker ${isWarning ? 'marker-pulse' : ''}" style="background-color: ${getStatusColor(v.status)};">
-                    <i class="fa-solid fa-truck"></i>
-                </div>`;
+window.locateOnMap = function (uid) {
+  if (markers[uid]) {
+    const latLng = markers[uid].getLatLng();
+    map.flyTo(latLng, 16);
+    markers[uid].openPopup();
+    if (window.innerWidth <= 1024) window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    showToast('Không tìm thấy tín hiệu GPS của xe này!', 'warning');
+  }
+};
 
-                const customIcon = L.divIcon({ html: iconHtml, className: '', iconSize: [30, 30], iconAnchor: [15, 15] });
+window.sendWarning = function (uid, plate) {
+  showToast(`Đã gửi cảnh báo khẩn cấp đến xe <b>${plate}</b>!`, 'error');
+};
 
-                const popupContent = `
-                    <div style="font-family:'Inter', sans-serif;">
-                        <b style="font-size:1.1rem; color: #333;">${v.plate}</b><br>
-                        <span style="color:#666; font-size:0.9rem;">Khách hàng: ${v.customerName}</span><hr style="margin:5px 0;">
-                        <b>Tuyến:</b> ${v.startPoint} ➔ ${v.endPoint}<br>
-                        <b>Trạng thái:</b> ${v.status} ${isOffline ? '<span style="color:red">(Mất tín hiệu GPS)</span>' : ''}<br>
-                        <b>Tốc độ:</b> ${v.location.speed || 0} km/h<br>
-                        <b>Giờ giao:</b> ${new Date(v.eta).toLocaleString('vi-VN')}
-                    </div>
-                `;
+function renderTable() {
+  const tbody = document.getElementById('table-body');
+  const searchVal = document.getElementById('search-input').value.toLowerCase();
+  const statusVal = document.getElementById('status-filter').value;
+  tbody.innerHTML = '';
 
-                if (markers[v.uid]) {
-                    markers[v.uid].setLatLng([v.location.lat, v.location.lng]);
-                    markers[v.uid].setIcon(customIcon);
-                    markers[v.uid].setPopupContent(popupContent);
-                } else {
-                    markers[v.uid] = L.marker([v.location.lat, v.location.lng], {icon: customIcon})
-                        .bindPopup(popupContent)
-                        .addTo(map);
-                }
-            });
-        }
+  let filtered = fleetData.filter(v => {
+    const matchSearch = v.plate.toLowerCase().includes(searchVal) || (v.customerName && v.customerName.toLowerCase().includes(searchVal));
+    const matchStatus = statusVal === 'ALL' || v.status === statusVal;
+    return matchSearch && matchStatus;
+  });
 
-        // Định vị từ bảng
-        window.locateOnMap = function(uid) {
-            if(markers[uid]) {
-                const latLng = markers[uid].getLatLng();
-                map.flyTo(latLng, 16);
-                markers[uid].openPopup();
-                if(window.innerWidth <= 1024) window.scrollTo({top: 0, behavior: 'smooth'});
-            } else {
-                showToast('Không tìm thấy tín hiệu GPS của xe này!', 'warning');
-            }
-        };
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: var(--text-muted);">Không có phương tiện nào đang hoạt động</td></tr>`;
+    return;
+  }
 
-        window.sendWarning = function(uid, plate) {
-            // Thực tế sẽ push vào node /notifications/{uid}
-            showToast(`Đã gửi cảnh báo khẩn cấp đến xe <b>${plate}</b>!`, 'error');
-        };
+  filtered.forEach(v => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${v.plate}</strong></td>
+      <td>Tài xế ${v.uid.substring(0,4)}</td>
+      <td>${v.startPoint} <i class="fa-solid fa-arrow-right" style="font-size:0.8rem; color:#9ca3af;"></i> ${v.endPoint}</td>
+      <td>${v.cargoType}</td>
+      <td>${new Date(v.eta).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</td>
+      <td><span class="status-badge ${getStatusClass(v.status)}">${v.status}</span></td>
+      <td>${parseInt(v.surcharge || 0).toLocaleString('vi-VN')} đ</td>
+      <td>
+        <button class="btn-action" onclick="locateOnMap('${v.uid}')" title="Định vị trên bản đồ"><i class="fa-solid fa-location-crosshairs"></i></button>
+        <button class="btn-action btn-warn" onclick="sendWarning('${v.uid}', '${v.plate}')" title="Gửi cảnh báo"><i class="fa-solid fa-triangle-exclamation"></i></button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
 
-        function renderTable() {
-            const tbody = document.getElementById('table-body');
-            const searchVal = document.getElementById('search-input').value.toLowerCase();
-            const statusVal = document.getElementById('status-filter').value;
-
-            tbody.innerHTML = '';
-
-            let filtered = fleetData.filter(v => {
-                const matchSearch = v.plate.toLowerCase().includes(searchVal) || (v.customerName && v.customerName.toLowerCase().includes(searchVal));
-                const matchStatus = statusVal === 'ALL' || v.status === statusVal;
-                return matchSearch && matchStatus;
-            });
-
-            if(filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: var(--text-muted);">Không có phương tiện nào đang hoạt động</td></tr>`;
-                return;
-            }
-
-            filtered.forEach(v => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><strong>${v.plate}</strong></td>
-                    <td>Tài xế ${v.uid.substring(0,4)}</td>
-                    <td>${v.startPoint} <i class="fa-solid fa-arrow-right" style="font-size:0.8rem; color:#aaa;"></i> ${v.endPoint}</td>
-                    <td>${v.cargoType}</td>
-                    <td>${new Date(v.eta).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})}</td>
-                    <td><span class="status-badge ${getStatusClass(v.status)}">${v.status}</span></td>
-                    <td>${parseInt(v.surcharge || 0).toLocaleString('vi-VN')} đ</td>
-                    <td>
-                        <button class="btn-action" onclick="locateOnMap('${v.uid}')" title="Định vị trên bản đồ"><i class="fa-solid fa-location-crosshairs"></i></button>
-                        <button class="btn-action btn-warn" onclick="sendWarning('${v.uid}', '${v.plate}')" title="Gửi cảnh báo"><i class="fa-solid fa-triangle-exclamation"></i></button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        // Lọc dữ liệu Local
-        document.getElementById('search-input').addEventListener('input', renderTable);
-        document.getElementById('status-filter').addEventListener('change', renderTable);
-
-    </script>
+document.getElementById('search-input').addEventListener('input', renderTable);
+document.getElementById('status-filter').addEventListener('change', renderTable);
+</script>
 </body>
 </html>
