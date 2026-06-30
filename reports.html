@@ -12,6 +12,7 @@
 
     <style>
         :root {
+            color-scheme: dark; /* Thêm color-scheme mặc định */
             --bg-color: #1a1a2e;
             --sidebar-bg: #111827;
             --card-bg: #16213e;
@@ -22,6 +23,17 @@
             --text-main: #ffffff;
             --text-muted: #a0a0b5;
             --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Thêm CSS cho theme sáng */
+        body.light-theme {
+            color-scheme: light;
+            --bg-color: #f3f4f6;
+            --sidebar-bg: #ffffff;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -81,6 +93,14 @@
         }
         .btn-export:hover { opacity: 0.8; }
 
+        /* Thêm CSS cho nút đổi theme */
+        .theme-toggle {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            color: var(--text-main); padding: 8px 15px; border-radius: 20px;
+            cursor: pointer; display: flex; gap: 8px; align-items: center;
+            font-family: inherit;
+        }
+
         /* --- FILTERS --- */
         .filter-section {
             background-color: var(--card-bg); border-radius: 12px; padding: 20px;
@@ -91,7 +111,8 @@
         .form-control {
             padding: 10px 15px; background-color: rgba(255,255,255,0.05);
             border: 1px solid var(--border-color); border-radius: 8px;
-            color: var(--text-main); font-family: inherit; outline: none; color-scheme: dark;
+            color: var(--text-main); font-family: inherit; outline: none; 
+            /* Đã xóa color-scheme: dark; ở đây theo yêu cầu để tự động đổi theo body.light-theme */
         }
         .form-control:focus { border-color: var(--accent-color); }
         .filter-actions { display: flex; gap: 10px; }
@@ -166,9 +187,14 @@
     <main class="main-content">
         <div class="topbar">
             <h2 class="page-title">Báo cáo & Lịch sử chuyến đi</h2>
-            <button class="btn-export" id="btn-export" onclick="exportCSV()">
-                <i class="fa-solid fa-download"></i> Xuất CSV
-            </button>
+            <div style="display: flex; gap: 10px;">
+                <button class="theme-toggle" id="theme-toggle">
+                    <i class="fa-solid fa-moon"></i> Giao diện
+                </button>
+                <button class="btn-export" id="btn-export" onclick="exportCSV()">
+                    <i class="fa-solid fa-download"></i> Xuất CSV
+                </button>
+            </div>
         </div>
 
         <div class="filter-section">
@@ -275,6 +301,15 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
+
+        // --- THEME LOGIC ---
+        // Đồng bộ giao diện sáng/tối từ localStorage
+        const themeToggle = document.getElementById('theme-toggle');
+        if (localStorage.getItem('tms_theme') === 'light') document.body.classList.add('light-theme');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('light-theme');
+            localStorage.setItem('tms_theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
+        });
 
         let allHistoryData = [];
         let currentFilteredData = [];
