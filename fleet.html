@@ -1,375 +1,350 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý Xe & Tài xế - TMS Mini v2.0</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <style>
-        :root {
-            color-scheme: dark; /* Thêm color-scheme mặc định */
-            --bg-color: #1a1a2e;
-            --sidebar-bg: #111827;
-            --card-bg: #16213e;
-            --accent-color: #e94560;
-            --success-color: #4cd137;
-            --danger-color: #e84118;
-            --warning-color: #fbc531;
-            --text-main: #ffffff;
-            --text-muted: #a0a0b5;
-            --border-color: rgba(255, 255, 255, 0.1);
-        }
-
-        /* Thêm CSS cho theme sáng */
-        body.light-theme {
-            color-scheme: light;
-            --bg-color: #f3f4f6;
-            --sidebar-bg: #ffffff;
-            --card-bg: #ffffff;
-            --text-main: #1f2937;
-            --text-muted: #6b7280;
-            --border-color: #e5e7eb;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            display: flex;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        /* --- SIDEBAR (Giống Dashboard) --- */
-        .sidebar {
-            width: 260px; background-color: var(--sidebar-bg);
-            border-right: 1px solid var(--border-color);
-            display: flex; flex-direction: column;
-            position: fixed; height: 100vh; z-index: 1000;
-        }
-        .sidebar-header {
-            padding: 20px; font-size: 1.5rem; font-weight: 700;
-            text-align: center; border-bottom: 1px solid var(--border-color);
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-        }
-        .sidebar-header span { color: var(--accent-color); }
-        .menu { flex: 1; padding: 20px 0; }
-        .menu-item {
-            padding: 15px 25px; display: flex; align-items: center; gap: 15px;
-            color: var(--text-muted); text-decoration: none; transition: all 0.2s;
-        }
-        .menu-item:hover, .menu-item.active {
-            background-color: rgba(233, 69, 96, 0.1); color: var(--accent-color);
-            border-right: 3px solid var(--accent-color);
-        }
-        .sidebar-footer { padding: 20px; border-top: 1px solid var(--border-color); }
-        .btn-logout {
-            width: 100%; padding: 12px; background: none; border: 1px solid var(--status-issue, #e84118);
-            color: var(--status-issue, #e84118); border-radius: 8px; cursor: pointer; transition: 0.2s;
-        }
-        .btn-logout:hover { background: var(--status-issue, #e84118); color: white; }
-
-        /* --- MAIN CONTENT --- */
-        .main-content {
-            flex: 1; margin-left: 260px; padding: 20px 30px;
-            display: flex; flex-direction: column; gap: 20px;
-        }
-        .topbar {
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .page-title { font-size: 1.8rem; font-weight: 600; }
-
-        /* Thêm CSS cho nút đổi theme */
-        .theme-toggle {
-            background: var(--card-bg); border: 1px solid var(--border-color);
-            color: var(--text-main); padding: 8px 15px; border-radius: 20px;
-            cursor: pointer; display: flex; gap: 8px; align-items: center;
-            font-family: inherit;
-        }
-
-        /* --- TABS --- */
-        .tabs {
-            display: flex; gap: 10px; border-bottom: 1px solid var(--border-color);
-        }
-        .tab-btn {
-            background: none; border: none; padding: 12px 20px;
-            color: var(--text-muted); font-size: 1rem; font-weight: 500;
-            cursor: pointer; position: relative; font-family: inherit;
-        }
-        .tab-btn.active { color: var(--accent-color); }
-        .tab-btn.active::after {
-            content: ''; position: absolute; bottom: -1px; left: 0;
-            width: 100%; height: 2px; background-color: var(--accent-color);
-        }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* --- TOOLBAR & TABLE --- */
-        .toolbar {
-            display: flex; justify-content: space-between; margin-bottom: 15px; margin-top: 15px;
-        }
-        .btn-primary {
-            background-color: var(--accent-color); color: white;
-            border: none; padding: 10px 20px; border-radius: 8px;
-            cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 8px;
-        }
-        .btn-primary:hover { background-color: #d13a53; }
-        
-        .card {
-            background-color: var(--card-bg); border-radius: 12px;
-            border: 1px solid var(--border-color); overflow-x: auto;
-        }
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th, td { padding: 12px 20px; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
-        th { color: var(--text-muted); font-weight: 500; font-size: 0.9rem; }
-        
-        .status-badge {
-            padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 600;
-        }
-        .st-active { background: rgba(76, 209, 55, 0.2); color: var(--success-color); }
-        .st-inactive { background: rgba(232, 65, 24, 0.2); color: var(--danger-color); }
-
-        .btn-icon {
-            background: none; border: none; cursor: pointer; padding: 5px 8px;
-            font-size: 1rem; color: var(--text-muted); transition: color 0.2s;
-        }
-        .btn-icon:hover { color: var(--accent-color); }
-        .btn-icon.edit:hover { color: var(--warning-color); }
-        .btn-icon.lock:hover { color: var(--warning-color); }
-        .btn-icon.delete:hover { color: var(--danger-color); }
-
-        /* --- MODALS --- */
-        .modal {
-            display: none; position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%; background: rgba(0,0,0,0.7);
-            z-index: 2000; align-items: center; justify-content: center;
-            backdrop-filter: blur(5px);
-        }
-        .modal.active { display: flex; }
-        .modal-content {
-            background-color: var(--card-bg); width: 100%; max-width: 500px;
-            border-radius: 12px; padding: 25px; border: 1px solid var(--border-color);
-            position: relative; max-height: 90vh; overflow-y: auto;
-        }
-        .modal-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;
-        }
-        .modal-header h3 { font-size: 1.2rem; }
-        .close-modal {
-            background: none; border: none; color: var(--text-muted);
-            font-size: 1.5rem; cursor: pointer;
-        }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 8px; font-size: 0.9rem; color: var(--text-muted); }
-        .form-control {
-            width: 100%; padding: 10px 15px; background-color: rgba(255,255,255,0.05);
-            border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-main); font-family: inherit;
-        }
-        .form-control:focus { outline: none; border-color: var(--accent-color); }
-        .form-control:disabled { opacity: 0.5; cursor: not-allowed; }
-        .modal-footer { margin-top: 25px; display: flex; justify-content: flex-end; gap: 10px; }
-        .btn-secondary {
-            background: rgba(255,255,255,0.1); color: white;
-            border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;
-        }
-
-        /* --- TOAST --- */
-        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-        .toast {
-            background-color: var(--card-bg); border-left: 4px solid var(--accent-color);
-            color: var(--text-main); padding: 15px; border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3); transform: translateX(120%); transition: transform 0.3s ease;
-        }
-        .toast.show { transform: translateX(0); }
-
-        @media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); }
-            .main-content { margin-left: 0; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quản lý Xe & Tài xế - TMS Mini v2.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+  --bg-color: #f4f6f9;
+  --sidebar-bg: #ffffff;
+  --card-bg: #ffffff;
+  --accent-color: #e94560;
+  --success-color: #2ecc71;
+  --danger-color: #e74c3c;
+  --warning-color: #f39c12;
+  --text-main: #1a1a2e;
+  --text-muted: #6b7280;
+  --border-color: #e5e7eb;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  display: flex;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+/* --- SIDEBAR --- */
+.sidebar {
+  width: 260px; background-color: var(--sidebar-bg);
+  border-right: 1px solid var(--border-color);
+  display: flex; flex-direction: column;
+  position: fixed; height: 100vh; z-index: 1000;
+}
+.sidebar-header {
+  padding: 20px; font-size: 1.5rem; font-weight: 700;
+  text-align: center; border-bottom: 1px solid var(--border-color);
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.sidebar-header span { color: var(--accent-color); }
+.menu { flex: 1; padding: 20px 0; }
+.menu-item {
+  padding: 15px 25px; display: flex; align-items: center; gap: 15px;
+  color: var(--text-muted); text-decoration: none; transition: all 0.2s;
+}
+.menu-item:hover, .menu-item.active {
+  background-color: rgba(233, 69, 96, 0.08); color: var(--accent-color);
+  border-right: 3px solid var(--accent-color);
+}
+.sidebar-footer { padding: 20px; border-top: 1px solid var(--border-color); }
+.btn-logout {
+  width: 100%; padding: 12px; background: none; border: 1px solid var(--danger-color);
+  color: var(--danger-color); border-radius: 8px; cursor: pointer; transition: 0.2s;
+}
+.btn-logout:hover { background: var(--danger-color); color: white; }
+/* --- MAIN CONTENT --- */
+.main-content {
+  flex: 1; margin-left: 260px; padding: 20px 30px;
+  display: flex; flex-direction: column; gap: 20px;
+}
+.topbar {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.page-title { font-size: 1.8rem; font-weight: 600; }
+/* --- TABS --- */
+.tabs {
+  display: flex; gap: 10px; border-bottom: 1px solid var(--border-color);
+}
+.tab-btn {
+  background: none; border: none; padding: 12px 20px;
+  color: var(--text-muted); font-size: 1rem; font-weight: 500;
+  cursor: pointer; position: relative; font-family: inherit;
+}
+.tab-btn.active { color: var(--accent-color); }
+.tab-btn.active::after {
+  content: ''; position: absolute; bottom: -1px; left: 0;
+  width: 100%; height: 2px; background-color: var(--accent-color);
+}
+.tab-content { display: none; }
+.tab-content.active { display: block; animation: fadeIn 0.3s; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+/* --- TOOLBAR & TABLE --- */
+.toolbar {
+  display: flex; justify-content: space-between; margin-bottom: 15px; margin-top: 15px;
+}
+.btn-primary {
+  background-color: var(--accent-color); color: white;
+  border: none; padding: 10px 20px; border-radius: 8px;
+  cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 8px;
+}
+.btn-primary:hover { background-color: #d13a53; }
+.card {
+  background-color: var(--card-bg); border-radius: 12px;
+  border: 1px solid var(--border-color); overflow-x: auto;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+table { width: 100%; border-collapse: collapse; text-align: left; }
+th, td { padding: 12px 20px; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
+th { color: var(--text-muted); font-weight: 500; font-size: 0.9rem; }
+.status-badge {
+  padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 600;
+}
+.st-active { background: rgba(46, 204, 113, 0.15); color: var(--success-color); }
+.st-inactive { background: rgba(231, 76, 60, 0.15); color: var(--danger-color); }
+.btn-icon {
+  background: none; border: none; cursor: pointer; padding: 5px 8px;
+  font-size: 1rem; color: var(--text-muted); transition: color 0.2s;
+}
+.btn-icon:hover { color: var(--accent-color); }
+.btn-icon.edit:hover { color: var(--warning-color); }
+.btn-icon.lock:hover { color: var(--warning-color); }
+.btn-icon.delete:hover { color: var(--danger-color); }
+/* --- MODALS --- */
+.modal {
+  display: none; position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%; background: rgba(0,0,0,0.45);
+  z-index: 2000; align-items: center; justify-content: center;
+  backdrop-filter: blur(3px);
+}
+.modal.active { display: flex; }
+.modal-content {
+  background-color: var(--card-bg); width: 100%; max-width: 500px;
+  border-radius: 12px; padding: 25px; border: 1px solid var(--border-color);
+  position: relative; max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+}
+.modal-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;
+}
+.modal-header h3 { font-size: 1.2rem; }
+.close-modal {
+  background: none; border: none; color: var(--text-muted);
+  font-size: 1.5rem; cursor: pointer;
+}
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; margin-bottom: 8px; font-size: 0.9rem; color: var(--text-muted); }
+.form-control {
+  width: 100%; padding: 10px 15px; background-color: #f9fafb;
+  border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-main); font-family: inherit;
+}
+.form-control:focus { outline: none; border-color: var(--accent-color); background-color: #ffffff; }
+.form-control:disabled { opacity: 0.6; cursor: not-allowed; }
+/* Fix dropdown sáng/tối: option luôn có màu tường minh */
+select.form-control {
+  color: var(--text-main);
+  background-color: #f9fafb;
+}
+select.form-control option {
+  color: var(--text-main);
+  background-color: #ffffff;
+}
+.modal-footer { margin-top: 25px; display: flex; justify-content: flex-end; gap: 10px; }
+.btn-secondary {
+  background: #f3f4f6; color: var(--text-main);
+  border: 1px solid var(--border-color); padding: 10px 20px; border-radius: 8px; cursor: pointer;
+}
+/* --- TOAST --- */
+#toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+.toast {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--accent-color);
+  color: var(--text-main); padding: 15px; border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.12); transform: translateX(120%); transition: transform 0.3s ease;
+}
+.toast.show { transform: translateX(0); }
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .main-content { margin-left: 0; }
+}
+</style>
 </head>
 <body>
+<div id="toast-container"></div>
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <i class="fa-solid fa-truck-fast"></i> TMS<span>Mini</span>
+  </div>
+  <div class="menu">
+    <a href="dashboard.html" class="menu-item">
+      <i class="fa-solid fa-chart-pie"></i> Dashboard
+    </a>
+    <a href="fleet.html" class="menu-item active">
+      <i class="fa-solid fa-users-gear"></i> Xe & Tài xế
+    </a>
+    <a href="reports.html" class="menu-item">
+      <i class="fa-solid fa-file-invoice"></i> Báo cáo
+    </a>
+  </div>
+  <div class="sidebar-footer">
+    <button class="btn-logout" id="btn-logout">Đăng xuất</button>
+  </div>
+</aside>
 
-    <div id="toast-container"></div>
+<main class="main-content">
+  <div class="topbar">
+    <h2 class="page-title">Quản lý Đội xe & Nhân sự</h2>
+  </div>
 
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <i class="fa-solid fa-truck-fast"></i> TMS<span>Mini</span>
-        </div>
-        <div class="menu">
-            <a href="dashboard.html" class="menu-item">
-                <i class="fa-solid fa-chart-pie"></i> Dashboard
-            </a>
-            <a href="fleet.html" class="menu-item active">
-                <i class="fa-solid fa-users-gear"></i> Xe & Tài xế
-            </a>
-            <a href="reports.html" class="menu-item">
-                <i class="fa-solid fa-file-invoice"></i> Báo cáo
-            </a>
-        </div>
-        <div class="sidebar-footer">
-            <button class="btn-logout" id="btn-logout">Đăng xuất</button>
-        </div>
-    </aside>
+  <div class="tabs">
+    <button class="tab-btn active" data-target="tab-drivers">Tài xế</button>
+    <button class="tab-btn" data-target="tab-vehicles">Phương tiện</button>
+  </div>
 
-    <main class="main-content">
-        <div class="topbar">
-            <h2 class="page-title">Quản lý Đội xe & Nhân sự</h2>
-            <button class="theme-toggle" id="theme-toggle">
-                <i class="fa-solid fa-moon"></i> Giao diện
-            </button>
-        </div>
-
-        <div class="tabs">
-            <button class="tab-btn active" data-target="tab-drivers">Tài xế</button>
-            <button class="tab-btn" data-target="tab-vehicles">Phương tiện</button>
-        </div>
-
-        <div id="tab-drivers" class="tab-content active">
-            <div class="toolbar">
-                <button class="btn-primary" onclick="openDriverModal()"><i class="fa-solid fa-plus"></i> Thêm tài xế</button>
-            </div>
-            <div class="card">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>STT</th><th>Tên tài xế</th><th>Email</th><th>SĐT</th>
-                            <th>Số GPLX</th><th>Ngày tạo</th><th>Trạng thái</th><th>Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody id="driver-table-body">
-                        <tr><td colspan="8" style="text-align: center;">Đang tải dữ liệu...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="tab-vehicles" class="tab-content">
-            <div class="toolbar">
-                <button class="btn-primary" onclick="openVehicleModal()"><i class="fa-solid fa-plus"></i> Thêm xe</button>
-            </div>
-            <div class="card">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>STT</th><th>Biển số</th><th>Loại xe</th><th>Tải trọng</th>
-                            <th>Năm SX</th><th>Tài xế phụ trách</th><th>Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody id="vehicle-table-body">
-                        <tr><td colspan="7" style="text-align: center;">Đang tải dữ liệu...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </main>
-
-    <div id="modal-driver" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="driver-modal-title">Thêm tài xế mới</h3>
-                <button class="close-modal" onclick="closeModal('modal-driver')">&times;</button>
-            </div>
-            <form id="driver-form">
-                <input type="hidden" id="d-uid">
-                <div class="form-group">
-                    <label>Tên đầy đủ *</label>
-                    <input type="text" id="d-name" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label>Email (Đăng nhập) *</label>
-                    <input type="email" id="d-email" class="form-control" required>
-                </div>
-                <div class="form-group" id="d-pwd-group">
-                    <label>Mật khẩu tạm *</label>
-                    <input type="text" id="d-password" class="form-control" minlength="6" required>
-                </div>
-                <div class="form-group">
-                    <label>Số điện thoại *</label>
-                    <input type="tel" id="d-phone" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label>Số GPLX *</label>
-                    <input type="text" id="d-license" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label>Ngày cấp GPLX</label>
-                    <input type="date" id="d-issuedate" class="form-control">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-secondary" onclick="closeModal('modal-driver')">Hủy</button>
-                    <button type="submit" class="btn-primary" id="d-submit-btn">Lưu dữ liệu</button>
-                </div>
-            </form>
-        </div>
+  <div id="tab-drivers" class="tab-content active">
+    <div class="toolbar">
+      <button class="btn-primary" onclick="openDriverModal()"><i class="fa-solid fa-plus"></i> Thêm tài xế</button>
     </div>
-
-    <div id="modal-vehicle" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="vehicle-modal-title">Thêm phương tiện mới</h3>
-                <button class="close-modal" onclick="closeModal('modal-vehicle')">&times;</button>
-            </div>
-            <form id="vehicle-form">
-                <input type="hidden" id="v-mode" value="add"> <div class="form-group">
-                    <label>Biển số xe *</label>
-                    <input type="text" id="v-plate" class="form-control" placeholder="VD: 51C-12345" required>
-                </div>
-                <div class="form-group">
-                    <label>Loại xe *</label>
-                    <select id="v-type" class="form-control" required>
-                        <option value="Xe tải nhỏ">Xe tải nhỏ</option>
-                        <option value="Container">Container</option>
-                        <option value="Đông lạnh">Đông lạnh</option>
-                        <option value="Xe bồn">Xe bồn</option>
-                        <option value="Khác">Khác</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Tải trọng (Tấn) *</label>
-                    <input type="number" step="0.1" id="v-capacity" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label>Năm sản xuất</label>
-                    <input type="number" id="v-year" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Màu xe</label>
-                    <input type="text" id="v-color" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Tài xế phụ trách</label>
-                    <select id="v-driver" class="form-control">
-                        <option value="">-- Chưa phân công --</option>
-                        </select>
-                </div>
-                <div class="form-group">
-                    <label>Ghi chú bảo trì</label>
-                    <textarea id="v-notes" class="form-control" rows="2"></textarea>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-secondary" onclick="closeModal('modal-vehicle')">Hủy</button>
-                    <button type="submit" class="btn-primary" id="v-submit-btn">Lưu dữ liệu</button>
-                </div>
-            </form>
-        </div>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>STT</th><th>Tên tài xế</th><th>Email</th><th>SĐT</th>
+            <th>Số GPLX</th><th>Ngày tạo</th><th>Trạng thái</th><th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody id="driver-table-body">
+          <tr><td colspan="8" style="text-align: center;">Đang tải dữ liệu...</td></tr>
+        </tbody>
+      </table>
     </div>
+  </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getDatabase, ref, onValue, get, set, update, remove } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+  <div id="tab-vehicles" class="tab-content">
+    <div class="toolbar">
+      <button class="btn-primary" onclick="openVehicleModal()"><i class="fa-solid fa-plus"></i> Thêm xe</button>
+    </div>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>STT</th><th>Biển số</th><th>Loại xe</th><th>Tải trọng</th>
+            <th>Năm SX</th><th>Tài xế phụ trách</th><th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody id="vehicle-table-body">
+          <tr><td colspan="7" style="text-align: center;">Đang tải dữ liệu...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
 
-        const firebaseConfig = {
+<div id="modal-driver" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="driver-modal-title">Thêm tài xế mới</h3>
+      <button class="close-modal" onclick="closeModal('modal-driver')">&times;</button>
+    </div>
+    <form id="driver-form">
+      <input type="hidden" id="d-uid">
+      <div class="form-group">
+        <label>Tên đầy đủ *</label>
+        <input type="text" id="d-name" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label>Email (Đăng nhập) *</label>
+        <input type="email" id="d-email" class="form-control" required>
+      </div>
+      <div class="form-group" id="d-pwd-group">
+        <label>Mật khẩu tạm *</label>
+        <input type="text" id="d-password" class="form-control" minlength="6" required>
+      </div>
+      <div class="form-group">
+        <label>Số điện thoại *</label>
+        <input type="tel" id="d-phone" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label>Số GPLX *</label>
+        <input type="text" id="d-license" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label>Ngày cấp GPLX</label>
+        <input type="date" id="d-issuedate" class="form-control">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="closeModal('modal-driver')">Hủy</button>
+        <button type="submit" class="btn-primary" id="d-submit-btn">Lưu dữ liệu</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modal-vehicle" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="vehicle-modal-title">Thêm phương tiện mới</h3>
+      <button class="close-modal" onclick="closeModal('modal-vehicle')">&times;</button>
+    </div>
+    <form id="vehicle-form">
+      <input type="hidden" id="v-mode" value="add">
+      <div class="form-group">
+        <label>Biển số xe *</label>
+        <input type="text" id="v-plate" class="form-control" placeholder="VD: 51C-12345" required>
+      </div>
+      <div class="form-group">
+        <label>Loại xe *</label>
+        <select id="v-type" class="form-control" required>
+          <option value="Xe tải nhỏ">Xe tải nhỏ</option>
+          <option value="Container">Container</option>
+          <option value="Đông lạnh">Đông lạnh</option>
+          <option value="Xe bồn">Xe bồn</option>
+          <option value="Khác">Khác</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Tải trọng (Tấn) *</label>
+        <input type="number" step="0.1" id="v-capacity" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label>Năm sản xuất</label>
+        <input type="number" id="v-year" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Màu xe</label>
+        <input type="text" id="v-color" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Tài xế phụ trách</label>
+        <select id="v-driver" class="form-control">
+          <option value="">-- Chưa phân công --</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Ghi chú bảo trì</label>
+        <textarea id="v-notes" class="form-control" rows="2"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="closeModal('modal-vehicle')">Hủy</button>
+        <button type="submit" class="btn-primary" id="v-submit-btn">Lưu dữ liệu</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+import { getDatabase, ref, onValue, get, set, update, remove } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+const firebaseConfig = {
   apiKey: "AIzaSyDtPkeLFdZqviWfinIMzdHxRHuv47TvUjY",
   authDomain: "mini-tsm-projectv2.firebaseapp.com",
   databaseURL: "https://mini-tsm-projectv2-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -379,333 +354,310 @@
   appId: "1:535774659933:web:600122096d9dea2f5514b4"
 };
 
-        // App chính cho Quản lý
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
+// App chính cho Quản lý: dùng tên "ManagerApp" để tách session khỏi tài xế
+const app = initializeApp(firebaseConfig, "ManagerApp");
+const auth = getAuth(app);
+const db = getDatabase(app);
 
-        // --- THEME LOGIC ---
-        // Đồng bộ giao diện sáng/tối từ localStorage
-        const themeToggle = document.getElementById('theme-toggle');
-        if (localStorage.getItem('tms_theme') === 'light') document.body.classList.add('light-theme');
-        themeToggle.addEventListener('click', () => {
-            document.body.classList.toggle('light-theme');
-            localStorage.setItem('tms_theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
-        });
+// SECONDARY APP: Dùng riêng để tạo tài khoản Tài xế mà không làm Quản lý bị đăng xuất
+const secondaryApp = initializeApp(firebaseConfig, "SecondaryApp");
+const secondaryAuth = getAuth(secondaryApp);
 
-        // SECONDARY APP: Dùng riêng để tạo tài khoản Tài xế mà không làm Quản lý bị đăng xuất
-        const secondaryApp = initializeApp(firebaseConfig, "SecondaryApp");
-        const secondaryAuth = getAuth(secondaryApp);
+let driversData = [];
+let vehiclesData = [];
 
-        let driversData = [];
-        let vehiclesData = [];
+window.closeModal = (id) => {
+  document.getElementById(id).classList.remove('active');
+};
 
-        // Global functions map cho các nút HTML inline (onclick)
-        window.closeModal = (id) => {
-            document.getElementById(id).classList.remove('active');
-        };
+function showToast(msg, type = 'info') {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.style.borderLeftColor = type === 'error' ? 'var(--danger-color)' : (type === 'success' ? 'var(--success-color)' : 'var(--accent-color)');
+  toast.innerText = msg;
+  container.appendChild(toast);
+  setTimeout(() => toast.classList.add('show'), 10);
+  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
+}
 
-        function showToast(msg, type = 'info') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.style.borderLeftColor = type === 'error' ? 'var(--danger-color)' : (type === 'success' ? 'var(--success-color)' : 'var(--accent-color)');
-            toast.innerText = msg;
-            container.appendChild(toast);
-            setTimeout(() => toast.classList.add('show'), 10);
-            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
+// --- AUTH GUARD ---
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    const snapshot = await get(ref(db, 'users/' + user.uid));
+    if (!snapshot.exists() || snapshot.val().role !== 'manager') {
+      window.location.replace('manager-login.html');
+    } else {
+      loadData();
+    }
+  } else {
+    window.location.replace('manager-login.html');
+  }
+});
+
+document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
+
+// --- TABS LOGIC ---
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    e.target.classList.add('active');
+    document.getElementById(e.target.dataset.target).classList.add('active');
+  });
+});
+
+// --- LOAD DATA ---
+function loadData() {
+  onValue(ref(db, 'users'), (snapshot) => {
+    driversData = [];
+    if (snapshot.exists()) {
+      snapshot.forEach(child => {
+        const data = child.val();
+        if (data.role === 'driver') {
+          data.uid = child.key;
+          driversData.push(data);
         }
+      });
+    }
+    renderDrivers();
+    updateDriverDropdown();
+  });
 
-        // --- AUTH GUARD ---
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const snapshot = await get(ref(db, 'users/' + user.uid));
-                if (!snapshot.exists() || snapshot.val().role !== 'manager') {
-                    window.location.replace('manager-login.html');
-                } else {
-                    loadData(); // Load RTDB data
-                }
-            } else {
-                window.location.replace('manager-login.html');
-            }
-        });
+  onValue(ref(db, 'fleet'), (snapshot) => {
+    vehiclesData = [];
+    if (snapshot.exists()) {
+      snapshot.forEach(child => {
+        const data = child.val();
+        data.plate = child.key;
+        vehiclesData.push(data);
+      });
+    }
+    renderVehicles();
+  });
+}
 
-        document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
+// ========================== TÀI XẾ (DRIVERS) ==========================
+function renderDrivers() {
+  const tbody = document.getElementById('driver-table-body');
+  tbody.innerHTML = '';
 
-        // --- TABS LOGIC ---
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                
-                e.target.classList.add('active');
-                document.getElementById(e.target.dataset.target).classList.add('active');
-            });
-        });
+  if (driversData.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align: center;">Chưa có dữ liệu tài xế</td></tr>`;
+    return;
+  }
 
-        // --- LOAD DATA ---
-        function loadData() {
-            // Lắng nghe Drivers
-            onValue(ref(db, 'users'), (snapshot) => {
-                driversData = [];
-                if (snapshot.exists()) {
-                    snapshot.forEach(child => {
-                        const data = child.val();
-                        if (data.role === 'driver') {
-                            data.uid = child.key;
-                            driversData.push(data);
-                        }
-                    });
-                }
-                renderDrivers();
-                updateDriverDropdown();
-            });
+  driversData.forEach((d, index) => {
+    const isActive = d.status !== 'inactive';
+    const statusHtml = `<span class="status-badge ${isActive ? 'st-active' : 'st-inactive'}">${isActive ? 'Hoạt động' : 'Khóa'}</span>`;
 
-            // Lắng nghe Vehicles
-            onValue(ref(db, 'fleet'), (snapshot) => {
-                vehiclesData = [];
-                if (snapshot.exists()) {
-                    snapshot.forEach(child => {
-                        const data = child.val();
-                        data.plate = child.key; // Key là biển số (đã thay thế dấu nếu có)
-                        vehiclesData.push(data);
-                    });
-                }
-                renderVehicles();
-            });
-        }
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${index + 1}</td>
+      <td><strong>${d.name || 'N/A'}</strong></td>
+      <td>${d.email}</td>
+      <td>${d.phone || 'N/A'}</td>
+      <td>${d.license || 'N/A'}</td>
+      <td>${d.createdAt ? new Date(d.createdAt).toLocaleDateString('vi-VN') : 'N/A'}</td>
+      <td>${statusHtml}</td>
+      <td>
+        <button class="btn-icon edit" onclick="editDriver('${d.uid}')" title="Sửa"><i class="fa-solid fa-pen-to-square"></i></button>
+        <button class="btn-icon lock" onclick="toggleDriver('${d.uid}', ${isActive})" title="${isActive ? 'Khóa' : 'Mở khóa'}"><i class="fa-solid fa-lock${isActive ? '' : '-open'}"></i></button>
+        <button class="btn-icon delete" onclick="deleteDriver('${d.uid}')" title="Xóa dữ liệu"><i class="fa-solid fa-trash"></i></button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
 
-        // ========================== TÀI XẾ (DRIVERS) ==========================
-        function renderDrivers() {
-            const tbody = document.getElementById('driver-table-body');
-            tbody.innerHTML = '';
-            if (driversData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center;">Chưa có dữ liệu tài xế</td></tr>`;
-                return;
-            }
+window.openDriverModal = () => {
+  document.getElementById('driver-form').reset();
+  document.getElementById('d-uid').value = '';
+  document.getElementById('d-email').disabled = false;
+  document.getElementById('d-password').required = true;
+  document.getElementById('d-pwd-group').style.display = 'block';
+  document.getElementById('driver-modal-title').innerText = 'Thêm tài xế mới';
+  document.getElementById('modal-driver').classList.add('active');
+};
 
-            driversData.forEach((d, index) => {
-                const isActive = d.status !== 'inactive';
-                const statusHtml = `<span class="status-badge ${isActive ? 'st-active' : 'st-inactive'}">${isActive ? 'Hoạt động' : 'Khóa'}</span>`;
-                
-                // Tránh XSS bằng cách tạo element (hoặc template string cẩn thận)
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td><strong>${d.name || 'N/A'}</strong></td>
-                    <td>${d.email}</td>
-                    <td>${d.phone || 'N/A'}</td>
-                    <td>${d.license || 'N/A'}</td>
-                    <td>${d.createdAt ? new Date(d.createdAt).toLocaleDateString('vi-VN') : 'N/A'}</td>
-                    <td>${statusHtml}</td>
-                    <td>
-                        <button class="btn-icon edit" onclick="editDriver('${d.uid}')" title="Sửa"><i class="fa-solid fa-pen-to-square"></i></button>
-                        <button class="btn-icon lock" onclick="toggleDriver('${d.uid}', ${isActive})" title="${isActive ? 'Khóa' : 'Mở khóa'}"><i class="fa-solid fa-lock${isActive ? '' : '-open'}"></i></button>
-                        <button class="btn-icon delete" onclick="deleteDriver('${d.uid}')" title="Xóa dữ liệu"><i class="fa-solid fa-trash"></i></button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
+window.editDriver = (uid) => {
+  const d = driversData.find(x => x.uid === uid);
+  if (!d) return;
 
-        window.openDriverModal = () => {
-            document.getElementById('driver-form').reset();
-            document.getElementById('d-uid').value = '';
-            document.getElementById('d-email').disabled = false;
-            document.getElementById('d-password').required = true;
-            document.getElementById('d-pwd-group').style.display = 'block';
-            document.getElementById('driver-modal-title').innerText = 'Thêm tài xế mới';
-            document.getElementById('modal-driver').classList.add('active');
-        };
+  document.getElementById('d-uid').value = d.uid;
+  document.getElementById('d-name').value = d.name || '';
+  document.getElementById('d-email').value = d.email;
+  document.getElementById('d-email').disabled = true;
+  document.getElementById('d-password').required = false;
+  document.getElementById('d-pwd-group').style.display = 'none';
+  document.getElementById('d-phone').value = d.phone || '';
+  document.getElementById('d-license').value = d.license || '';
+  document.getElementById('d-issuedate').value = d.issueDate || '';
+  document.getElementById('driver-modal-title').innerText = 'Cập nhật tài xế';
+  document.getElementById('modal-driver').classList.add('active');
+};
 
-        window.editDriver = (uid) => {
-            const d = driversData.find(x => x.uid === uid);
-            if (!d) return;
-            
-            document.getElementById('d-uid').value = d.uid;
-            document.getElementById('d-name').value = d.name || '';
-            document.getElementById('d-email').value = d.email;
-            document.getElementById('d-email').disabled = true; // Không cho sửa email để tránh rắc rối Auth
-            document.getElementById('d-password').required = false;
-            document.getElementById('d-pwd-group').style.display = 'none'; // Ẩn đổi pass
-            document.getElementById('d-phone').value = d.phone || '';
-            document.getElementById('d-license').value = d.license || '';
-            document.getElementById('d-issuedate').value = d.issueDate || '';
-            
-            document.getElementById('driver-modal-title').innerText = 'Cập nhật tài xế';
-            document.getElementById('modal-driver').classList.add('active');
-        };
+document.getElementById('driver-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('d-submit-btn');
+  btn.disabled = true; btn.innerText = 'Đang xử lý...';
 
-        document.getElementById('driver-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('d-submit-btn');
-            btn.disabled = true; btn.innerText = 'Đang xử lý...';
+  const uid = document.getElementById('d-uid').value;
+  const data = {
+    name: document.getElementById('d-name').value,
+    phone: document.getElementById('d-phone').value,
+    license: document.getElementById('d-license').value,
+    issueDate: document.getElementById('d-issuedate').value,
+    role: 'driver',
+    status: 'active'
+  };
 
-            const uid = document.getElementById('d-uid').value;
-            const data = {
-                name: document.getElementById('d-name').value,
-                phone: document.getElementById('d-phone').value,
-                license: document.getElementById('d-license').value,
-                issueDate: document.getElementById('d-issuedate').value,
-                role: 'driver',
-                status: 'active'
-            };
+  try {
+    if (uid) {
+      await update(ref(db, 'users/' + uid), data);
+      showToast('Đã cập nhật thông tin tài xế!', 'success');
+    } else {
+      const email = document.getElementById('d-email').value;
+      const password = document.getElementById('d-password').value;
+      const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+      data.email = email;
+      data.createdAt = Date.now();
+      await set(ref(db, 'users/' + userCredential.user.uid), data);
+      await signOut(secondaryAuth);
+      showToast('Đã thêm tài xế thành công!', 'success');
+    }
+    closeModal('modal-driver');
+  } catch (error) {
+    console.error(error);
+    let msg = "Đã xảy ra lỗi!";
+    if (error.code === 'auth/email-already-in-use') msg = "Email này đã được sử dụng!";
+    showToast(msg, 'error');
+  } finally {
+    btn.disabled = false; btn.innerText = 'Lưu dữ liệu';
+  }
+});
 
-            try {
-                if (uid) {
-                    // Update (Chỉ sửa database)
-                    await update(ref(db, 'users/' + uid), data);
-                    showToast('Đã cập nhật thông tin tài xế!', 'success');
-                } else {
-                    // Create (Tạo Auth bằng SecondaryApp + ghi Database)
-                    const email = document.getElementById('d-email').value;
-                    const password = document.getElementById('d-password').value;
-                    
-                    const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
-                    data.email = email;
-                    data.createdAt = Date.now();
-                    
-                    await set(ref(db, 'users/' + userCredential.user.uid), data);
-                    // Có thể tự động sign out secondaryAuth ngay lập tức để dọn dẹp
-                    await signOut(secondaryAuth);
-                    
-                    showToast('Đã thêm tài xế thành công!', 'success');
-                }
-                closeModal('modal-driver');
-            } catch (error) {
-                console.error(error);
-                let msg = "Đã xảy ra lỗi!";
-                if(error.code === 'auth/email-already-in-use') msg = "Email này đã được sử dụng!";
-                showToast(msg, 'error');
-            } finally {
-                btn.disabled = false; btn.innerText = 'Lưu dữ liệu';
-            }
-        });
+window.toggleDriver = async (uid, currentActive) => {
+  if (confirm(`Bạn muốn ${currentActive ? 'KHÓA' : 'MỞ KHÓA'} tài xế này?`)) {
+    await update(ref(db, 'users/' + uid), { status: currentActive ? 'inactive' : 'active' });
+    showToast('Đã thay đổi trạng thái!');
+  }
+};
 
-        window.toggleDriver = async (uid, currentActive) => {
-            if(confirm(`Bạn muốn ${currentActive ? 'KHÓA' : 'MỞ KHÓA'} tài xế này?`)) {
-                await update(ref(db, 'users/' + uid), { status: currentActive ? 'inactive' : 'active' });
-                showToast('Đã thay đổi trạng thái!');
-            }
-        };
+window.deleteDriver = async (uid) => {
+  if (confirm('Xóa dữ liệu tài xế? (Lưu ý: Không thể xóa tài khoản Auth từ phía Client, chỉ xóa thông tin hồ sơ)')) {
+    await remove(ref(db, 'users/' + uid));
+    showToast('Đã xóa hồ sơ tài xế!', 'success');
+  }
+};
 
-        window.deleteDriver = async (uid) => {
-            if(confirm('Xóa dữ liệu tài xế? (Lưu ý: Không thể xóa tài khoản Auth từ phía Client, chỉ xóa thông tin hồ sơ)')) {
-                await remove(ref(db, 'users/' + uid));
-                showToast('Đã xóa hồ sơ tài xế!', 'success');
-            }
-        };
+// ========================== PHƯƠNG TIỆN (VEHICLES) ==========================
+function updateDriverDropdown() {
+  const select = document.getElementById('v-driver');
+  const currentVal = select.value;
+  select.innerHTML = '<option value="">-- Chưa phân công --</option>';
+  driversData.forEach(d => {
+    if (d.status !== 'inactive') {
+      select.innerHTML += `<option value="${d.uid}">${d.name} (${d.phone})</option>`;
+    }
+  });
+  select.value = currentVal;
+}
 
-        // ========================== PHƯƠNG TIỆN (VEHICLES) ==========================
-        function updateDriverDropdown() {
-            const select = document.getElementById('v-driver');
-            const currentVal = select.value;
-            select.innerHTML = '<option value="">-- Chưa phân công --</option>';
-            driversData.forEach(d => {
-                if (d.status !== 'inactive') {
-                    select.innerHTML += `<option value="${d.uid}">${d.name} (${d.phone})</option>`;
-                }
-            });
-            select.value = currentVal; // Giữ lại giá trị đang chọn nếu có
-        }
+function renderVehicles() {
+  const tbody = document.getElementById('vehicle-table-body');
+  tbody.innerHTML = '';
 
-        function renderVehicles() {
-            const tbody = document.getElementById('vehicle-table-body');
-            tbody.innerHTML = '';
-            if (vehiclesData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center;">Chưa có dữ liệu xe</td></tr>`;
-                return;
-            }
+  if (vehiclesData.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center;">Chưa có dữ liệu xe</td></tr>`;
+    return;
+  }
 
-            vehiclesData.forEach((v, index) => {
-                // Map uid tài xế ra tên
-                let driverName = "Chưa phân công";
-                if(v.driverId) {
-                    const dr = driversData.find(x => x.uid === v.driverId);
-                    if(dr) driverName = dr.name;
-                }
+  vehiclesData.forEach((v, index) => {
+    let driverName = "Chưa phân công";
+    if (v.driverId) {
+      const dr = driversData.find(x => x.uid === v.driverId);
+      if (dr) driverName = dr.name;
+    }
 
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td><strong>${v.plate}</strong></td>
-                    <td>${v.type}</td>
-                    <td>${v.capacity} Tấn</td>
-                    <td>${v.year || '-'}</td>
-                    <td>${driverName}</td>
-                    <td>
-                        <button class="btn-icon edit" onclick="editVehicle('${v.plate}')" title="Sửa"><i class="fa-solid fa-pen-to-square"></i></button>
-                        <button class="btn-icon delete" onclick="deleteVehicle('${v.plate}')" title="Xóa"><i class="fa-solid fa-trash"></i></button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${index + 1}</td>
+      <td><strong>${v.plate}</strong></td>
+      <td>${v.type}</td>
+      <td>${v.capacity} Tấn</td>
+      <td>${v.year || '-'}</td>
+      <td>${driverName}</td>
+      <td>
+        <button class="btn-icon edit" onclick="editVehicle('${v.plate}')" title="Sửa"><i class="fa-solid fa-pen-to-square"></i></button>
+        <button class="btn-icon delete" onclick="deleteVehicle('${v.plate}')" title="Xóa"><i class="fa-solid fa-trash"></i></button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
 
-        window.openVehicleModal = () => {
-            document.getElementById('vehicle-form').reset();
-            document.getElementById('v-mode').value = 'add';
-            document.getElementById('v-plate').disabled = false; // Add thì cho nhập
-            document.getElementById('vehicle-modal-title').innerText = 'Thêm phương tiện mới';
-            document.getElementById('modal-vehicle').classList.add('active');
-        };
+window.openVehicleModal = () => {
+  document.getElementById('vehicle-form').reset();
+  document.getElementById('v-mode').value = 'add';
+  document.getElementById('v-plate').disabled = false;
+  document.getElementById('vehicle-modal-title').innerText = 'Thêm phương tiện mới';
+  document.getElementById('modal-vehicle').classList.add('active');
+};
 
-        window.editVehicle = (plate) => {
-            const v = vehiclesData.find(x => x.plate === plate);
-            if(!v) return;
+window.editVehicle = (plate) => {
+  const v = vehiclesData.find(x => x.plate === plate);
+  if (!v) return;
 
-            document.getElementById('v-mode').value = 'edit';
-            document.getElementById('v-plate').value = v.plate;
-            document.getElementById('v-plate').disabled = true; // Sửa thì không đổi khóa chính (Biển số)
-            document.getElementById('v-type').value = v.type;
-            document.getElementById('v-capacity').value = v.capacity;
-            document.getElementById('v-year').value = v.year || '';
-            document.getElementById('v-color').value = v.color || '';
-            document.getElementById('v-driver').value = v.driverId || '';
-            document.getElementById('v-notes').value = v.notes || '';
+  document.getElementById('v-mode').value = 'edit';
+  document.getElementById('v-plate').value = v.plate;
+  document.getElementById('v-plate').disabled = true;
+  document.getElementById('v-type').value = v.type;
+  document.getElementById('v-capacity').value = v.capacity;
+  document.getElementById('v-year').value = v.year || '';
+  document.getElementById('v-color').value = v.color || '';
+  document.getElementById('v-driver').value = v.driverId || '';
+  document.getElementById('v-notes').value = v.notes || '';
+  document.getElementById('vehicle-modal-title').innerText = 'Cập nhật phương tiện';
+  document.getElementById('modal-vehicle').classList.add('active');
+};
 
-            document.getElementById('vehicle-modal-title').innerText = 'Cập nhật phương tiện';
-            document.getElementById('modal-vehicle').classList.add('active');
-        };
+document.getElementById('vehicle-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('v-submit-btn');
+  btn.disabled = true; btn.innerText = 'Đang xử lý...';
 
-        document.getElementById('vehicle-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('v-submit-btn');
-            btn.disabled = true; btn.innerText = 'Đang xử lý...';
+  let plate = document.getElementById('v-plate').value.trim().toUpperCase();
+  plate = plate.replace(/[.#$\[\]]/g, '-');
 
-            let plate = document.getElementById('v-plate').value.trim().toUpperCase();
-            // Xóa các ký tự cấm của Firebase key nếu người dùng nhập sai
-            plate = plate.replace(/[.#$\[\]]/g, '-'); 
+  const data = {
+    type: document.getElementById('v-type').value,
+    capacity: document.getElementById('v-capacity').value,
+    year: document.getElementById('v-year').value,
+    color: document.getElementById('v-color').value,
+    driverId: document.getElementById('v-driver').value,
+    notes: document.getElementById('v-notes').value,
+    lastUpdated: Date.now()
+  };
 
-            const data = {
-                type: document.getElementById('v-type').value,
-                capacity: document.getElementById('v-capacity').value,
-                year: document.getElementById('v-year').value,
-                color: document.getElementById('v-color').value,
-                driverId: document.getElementById('v-driver').value,
-                notes: document.getElementById('v-notes').value,
-                lastUpdated: Date.now()
-            };
+  try {
+    await set(ref(db, 'fleet/' + plate), data);
+    showToast('Lưu dữ liệu phương tiện thành công!', 'success');
+    closeModal('modal-vehicle');
+  } catch (error) {
+    console.error(error);
+    showToast('Có lỗi xảy ra khi lưu!', 'error');
+  } finally {
+    btn.disabled = false; btn.innerText = 'Lưu dữ liệu';
+  }
+});
 
-            try {
-                await set(ref(db, 'fleet/' + plate), data);
-                showToast('Lưu dữ liệu phương tiện thành công!', 'success');
-                closeModal('modal-vehicle');
-            } catch (error) {
-                console.error(error);
-                showToast('Có lỗi xảy ra khi lưu!', 'error');
-            } finally {
-                btn.disabled = false; btn.innerText = 'Lưu dữ liệu';
-            }
-        });
-
-        window.deleteVehicle = async (plate) => {
-            if(confirm(`Bạn chắc chắn muốn xóa phương tiện mang biển số [${plate}] khỏi hệ thống?`)) {
-                await remove(ref(db, 'fleet/' + plate));
-                showToast('Đã xóa phương tiện!', 'success');
-            }
-        };
-
-    </script>
+window.deleteVehicle = async (plate) => {
+  if (confirm(`Bạn chắc chắn muốn xóa phương tiện mang biển số [${plate}] khỏi hệ thống?`)) {
+    await remove(ref(db, 'fleet/' + plate));
+    showToast('Đã xóa phương tiện!', 'success');
+  }
+};
+</script>
 </body>
 </html>
