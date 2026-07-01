@@ -1,701 +1,538 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Báo cáo & Lịch sử - TMS Mini v2.0</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
-:root {
-  --bg-color: #f4f6f9;
-  --sidebar-bg: #ffffff;
-  --card-bg: #ffffff;
-  --accent-color: #e94560;
-  --success-color: #2ecc71;
-  --danger-color: #e74c3c;
-  --warning-color: #f39c12;
-  --text-main: #1a1a2e;
-  --text-muted: #6b7280;
-  --border-color: #e5e7eb;
-}
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  font-family: 'Inter', sans-serif;
-  background-color: var(--bg-color);
-  color: var(--text-main);
-  display: flex;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-/* --- SIDEBAR --- */
-.sidebar {
-  width: 260px; background-color: var(--sidebar-bg);
-  border-right: 1px solid var(--border-color);
-  display: flex; flex-direction: column;
-  position: fixed; height: 100vh; z-index: 1000;
-}
-.sidebar-header {
-  padding: 20px; font-size: 1.5rem; font-weight: 700;
-  text-align: center; border-bottom: 1px solid var(--border-color);
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-}
-.sidebar-header span { color: var(--accent-color); }
-.menu { flex: 1; padding: 20px 0; }
-.menu-item {
-  padding: 15px 25px; display: flex; align-items: center; gap: 15px;
-  color: var(--text-muted); text-decoration: none; transition: all 0.2s;
-}
-.menu-item:hover, .menu-item.active {
-  background-color: rgba(233, 69, 96, 0.08); color: var(--accent-color);
-  border-right: 3px solid var(--accent-color);
-}
-.sidebar-footer { padding: 20px; border-top: 1px solid var(--border-color); }
-.btn-logout {
-  width: 100%; padding: 12px; background: none; border: 1px solid var(--danger-color);
-  color: var(--danger-color); border-radius: 8px; cursor: pointer; transition: 0.2s;
-}
-.btn-logout:hover { background: var(--danger-color); color: white; }
-/* --- MAIN CONTENT --- */
-.main-content {
-  flex: 1; margin-left: 260px; padding: 20px 30px;
-  display: flex; flex-direction: column; gap: 20px;
-}
-.topbar {
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 10px;
-}
-.page-title { font-size: 1.8rem; font-weight: 600; }
-.btn-export {
-  background-color: var(--success-color); color: white; border: none;
-  padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;
-  display: flex; align-items: center; gap: 8px; transition: opacity 0.2s;
-}
-.btn-export:hover { opacity: 0.85; }
-/* --- FILTERS --- */
-.filter-section {
-  background-color: var(--card-bg); border-radius: 12px; padding: 20px;
-  border: 1px solid var(--border-color); display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-}
-.form-group { display: flex; flex-direction: column; flex: 1; min-width: 180px; }
-.form-group label { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; }
-.form-control {
-  padding: 10px 15px; background-color: #f9fafb;
-  border: 1px solid var(--border-color); border-radius: 8px;
-  color: var(--text-main); font-family: inherit; outline: none;
-  color-scheme: light;
-}
-.form-control:focus { border-color: var(--accent-color); background-color: #ffffff; }
-/* Fix dropdown sáng/tối: option luôn có màu tường minh */
-select.form-control {
-  color: var(--text-main);
-  background-color: #f9fafb;
-}
-select.form-control option {
-  color: var(--text-main);
-  background-color: #ffffff;
-}
-.filter-actions { display: flex; gap: 10px; }
-.btn-filter {
-  background-color: var(--accent-color); color: white; border: none;
-  padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500; height: 40px;
-}
-.btn-reset {
-  background-color: transparent; color: var(--text-muted); border: 1px solid var(--border-color);
-  padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500; height: 40px;
-}
-.btn-filter:hover { background-color: #d13a53; }
-.btn-reset:hover { border-color: var(--text-muted); color: var(--text-main); }
-/* --- KPIs --- */
-.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
-.kpi-card {
-  background-color: var(--card-bg); border-radius: 12px; padding: 20px;
-  border: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-}
-.kpi-icon {
-  width: 50px; height: 50px; border-radius: 10px; display: flex;
-  align-items: center; justify-content: center; font-size: 1.5rem;
-}
-.kpi-info h3 { font-size: 1.6rem; font-weight: 700; margin-bottom: 5px; }
-.kpi-info p { color: var(--text-muted); font-size: 0.9rem; }
-/* --- TABLE --- */
-.table-section {
-  background-color: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color);
-  overflow: hidden; flex: 1;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-}
-.table-wrapper { overflow-x: auto; max-height: 500px; }
-table { width: 100%; border-collapse: collapse; text-align: left; }
-th, td { padding: 12px 15px; border-bottom: 1px solid var(--border-color); white-space: nowrap; font-size: 0.95rem; }
-th { color: var(--text-muted); font-weight: 500; position: sticky; top: 0; background: var(--card-bg); z-index: 10; box-shadow: 0 1px 0 var(--border-color); }
-.status-badge { padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
-.st-done { background: rgba(46, 204, 113, 0.15); color: var(--success-color); }
-.st-issue { background: rgba(231, 76, 60, 0.15); color: var(--danger-color); }
-.st-other { background: rgba(107, 114, 128, 0.15); color: var(--text-muted); }
-.skeleton { background: linear-gradient(90deg, #eef0f3 25%, #f7f8fa 50%, #eef0f3 75%); background-size: 200% 100%; animation: loading 1.5s infinite; border-radius: 4px; color: transparent !important; }
-@keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-/* Toast */
-#toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-.toast { background-color: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid var(--accent-color); color: var(--text-main); padding: 15px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.12); transform: translateX(120%); transition: transform 0.3s ease; }
-.toast.show { transform: translateX(0); }
-@media (max-width: 1024px) { .sidebar { transform: translateX(-100%); } .main-content { margin-left: 0; } }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo cáo & Lịch sử - TMS Mini v2.0</title>
 
-/* ===========================================================
-   RESPONSIVE SIDEBAR & LAYOUT — Tự động thêm vào
-   =========================================================== */
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-/* --- Transition mượt cho sidebar & main --- */
-.sidebar { transition: width 0.3s ease, transform 0.3s ease !important; overflow: hidden !important; }
-.main-content { transition: margin-left 0.3s ease !important; }
+    <style>
+        :root {
+            /* Bảng màu Sáng (Light Theme cố định) */
+            --bg-color: #f4f6f9;
+            --sidebar-bg: #ffffff;
+            --card-bg: #ffffff;
+            --accent-color: #e94560;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --text-main: #1a1a2e;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+        }
 
-/* --- Nút toggle ☰ trong sidebar --- */
-.sidebar-toggle {
-  background: none; border: none; color: var(--text-muted);
-  font-size: 1.1rem; cursor: pointer; padding: 6px 9px;
-  border-radius: 6px; transition: background 0.2s; flex-shrink: 0; line-height: 1;
-}
-.sidebar-toggle:hover { background: rgba(233,69,96,0.1); color: var(--accent-color); }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-/* --- Cấu trúc lại sidebar-header --- */
-.sidebar-header {
-  display: flex !important; justify-content: space-between !important;
-  align-items: center !important; padding: 15px 18px !important;
-}
-.logo-wrap { display: flex; align-items: center; gap: 10px; font-size: 1.4rem; font-weight: 700; }
-.logo-wrap .logo-accent { color: var(--accent-color); }
-.logo-brand-text { white-space: nowrap; overflow: hidden; transition: all 0.3s; }
+        body {
+            font-family: 'Inter', sans-serif; background-color: var(--bg-color);
+            color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden;
+        }
 
-/* --- menu-label & btn-text transition --- */
-.menu-label { transition: opacity 0.25s, width 0.25s, margin 0.25s; white-space: nowrap; overflow: hidden; }
-.btn-text { transition: opacity 0.25s, width 0.25s; white-space: nowrap; overflow: hidden; }
+        /* --- MOBILE HEADER & OVERLAY --- */
+        .mobile-header {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 60px;
+            background-color: var(--sidebar-bg); box-shadow: var(--shadow-sm); z-index: 999;
+            justify-content: space-between; align-items: center; padding: 0 20px;
+        }
+        .mobile-header-logo { font-size: 1.2rem; font-weight: 700; color: var(--text-main); }
+        .mobile-header-logo span { color: var(--accent-color); }
+        .btn-mobile-toggle { background: none; border: none; font-size: 1.5rem; color: var(--text-main); cursor: pointer; }
+        .btn-mobile-logout { background: none; border: none; font-size: 1.2rem; color: var(--danger-color); cursor: pointer; }
 
-/* ---- Trạng thái THU GỌN (collapsed) ---- */
-.sidebar.collapsed { width: 68px !important; }
-.sidebar.collapsed + .main-content { margin-left: 68px !important; }
-.sidebar.collapsed .logo-brand-text { width: 0; opacity: 0; margin: 0; overflow: hidden; }
-.sidebar.collapsed .menu-label { width: 0; opacity: 0; margin: 0; }
-.sidebar.collapsed .btn-text { width: 0; opacity: 0; margin: 0; }
-.sidebar.collapsed .menu-item { justify-content: center !important; padding: 15px 10px !important; }
-.sidebar.collapsed .menu-item i { font-size: 1.15rem; }
-.sidebar.collapsed .btn-logout {
-  display: flex !important; justify-content: center !important;
-  padding: 10px !important; width: auto !important;
-}
-/* Badge khi collapsed */
-.sidebar.collapsed .badge { position: absolute; top: 6px; right: 6px; margin: 0; }
+        .sidebar-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 1000; opacity: 0; transition: opacity 0.3s ease;
+        }
+        .sidebar-overlay.active { display: block; opacity: 1; }
 
-/* --- Tooltip khi collapsed --- */
-.menu-item { position: relative; }
-.sidebar.collapsed .menu-item::after {
-  content: attr(title); position: absolute; left: 78px; top: 50%;
-  transform: translateY(-50%); background: #1e293b; color: #fff;
-  padding: 5px 11px; border-radius: 7px; font-size: 0.8rem;
-  white-space: nowrap; opacity: 0; pointer-events: none;
-  transition: opacity 0.2s; z-index: 9999;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.25);
-}
-.sidebar.collapsed .menu-item:hover::after { opacity: 1; }
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 260px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm); display: flex; flex-direction: column;
+            position: fixed; height: 100vh; z-index: 1001; transition: width 0.3s ease, transform 0.3s ease; overflow: hidden;
+        }
+        
+        .sidebar.collapsed { width: 70px; }
+        .sidebar.collapsed .sidebar-text { opacity: 0; width: 0; display: none; }
+        .sidebar.collapsed .sidebar-header { justify-content: center; padding: 20px 0; }
+        .sidebar.collapsed .menu-item { justify-content: center; padding: 15px 0; }
+        .sidebar.collapsed .menu-item i { margin: 0; font-size: 1.2rem; }
+        .sidebar.collapsed .sidebar-footer { padding: 20px 10px; }
 
-/* --- Overlay dark (mobile) --- */
-.sidebar-overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.52); z-index: 998;
-  opacity: 0; transition: opacity 0.3s;
-}
-.sidebar-overlay.active { opacity: 1; }
+        .sidebar-header {
+            padding: 20px; font-size: 1.5rem; font-weight: 700; text-align: center; color: var(--text-main);
+            border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;
+        }
+        .logo-wrap { display: flex; align-items: center; gap: 10px; }
+        .logo-wrap span.sidebar-text { color: var(--accent-color); transition: 0.3s; }
+        .btn-desktop-toggle { background: none; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer; transition: 0.2s; }
+        .btn-desktop-toggle:hover { color: var(--accent-color); }
 
-/* --- Mobile topbar --- */
-.mobile-topbar {
-  display: none; position: fixed; top: 0; left: 0; right: 0; height: 58px;
-  background: var(--sidebar-bg); border-bottom: 1px solid var(--border-color);
-  align-items: center; padding: 0 14px;
-  justify-content: space-between; z-index: 1000; gap: 10px;
-}
-.mobile-logo { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-.mobile-logo .m-accent { color: var(--accent-color); }
-.mobile-ham {
-  background: none; border: none; color: var(--text-main);
-  font-size: 1.25rem; cursor: pointer; padding: 7px; border-radius: 6px; line-height: 1;
-}
-.mobile-ham:hover { background: rgba(233,69,96,0.08); color: var(--accent-color); }
-.mobile-logout-btn {
-  background: none; border: none; color: var(--accent-color);
-  font-size: 1.1rem; cursor: pointer; padding: 7px; border-radius: 6px;
-}
+        .menu { flex: 1; padding: 20px 0; }
+        .menu-item {
+            padding: 15px 25px; display: flex; align-items: center; gap: 15px;
+            color: var(--text-muted); text-decoration: none; transition: all 0.2s; font-weight: 500; white-space: nowrap;
+        }
+        .menu-item:hover, .menu-item.active { background-color: rgba(233, 69, 96, 0.08); color: var(--accent-color); border-right: 3px solid var(--accent-color); }
+        .sidebar-footer { padding: 20px; border-top: 1px solid var(--border-color); }
+        .btn-logout {
+            width: 100%; padding: 12px; background: none; border: 1px solid var(--danger-color);
+            color: var(--danger-color); border-radius: 8px; cursor: pointer; font-family: inherit; font-weight: 600;
+            transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; white-space: nowrap;
+        }
+        .btn-logout:hover { background: var(--danger-color); color: white; }
 
-/* =================== BREAKPOINTS =================== */
+        /* --- MAIN CONTENT --- */
+        .main-content {
+            flex: 1; margin-left: 260px; padding: 20px 30px; display: flex; flex-direction: column; gap: 20px;
+            transition: margin-left 0.3s ease; width: 100%;
+        }
+        .main-content.expanded { margin-left: 70px; }
 
-/* Desktop hẹp (< 1200px): KPI 2 cột */
-@media (max-width: 1200px) {
-  .kpi-grid, .stat-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
-}
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 15px; }
+        .page-title { font-size: 1.8rem; font-weight: 600; color: var(--text-main); }
+        .btn-export {
+            background-color: var(--success-color); color: white; border: none;
+            padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;
+            display: flex; align-items: center; gap: 8px; box-shadow: 0 1px 3px rgba(46,204,113,0.3); transition: opacity 0.2s;
+        }
+        .btn-export:hover { opacity: 0.8; }
 
-/* Desktop nhỏ (769–1024px): sidebar tự thu gọn */
-@media (max-width: 1024px) and (min-width: 769px) {
-  .sidebar { width: 68px !important; }
-  .main-content { margin-left: 68px !important; }
-  .sidebar .logo-brand-text { width: 0; opacity: 0; overflow: hidden; }
-  .sidebar .menu-label { width: 0; opacity: 0; overflow: hidden; }
-  .sidebar .btn-text { width: 0; opacity: 0; overflow: hidden; }
-  .sidebar .menu-item { justify-content: center !important; padding: 15px 10px !important; }
-  .sidebar .btn-logout { display: flex !important; justify-content: center !important; padding: 10px !important; width: auto !important; }
-}
+        /* --- FILTERS --- */
+        .filter-section {
+            background-color: var(--card-bg); border-radius: 12px; padding: 20px; box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color); display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;
+        }
+        .form-group { display: flex; flex-direction: column; flex: 1; min-width: 180px; }
+        .form-group label { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 500; }
+        .form-control {
+            padding: 10px 15px; background-color: #f9fafb; border: 1px solid var(--border-color); border-radius: 8px;
+            color: var(--text-main); font-family: inherit; outline: none; width: 100%;
+        }
+        /* Fix Select Dropdown & Input Date */
+        select.form-control, input[type="date"].form-control { background-color: #ffffff; color: var(--text-main); appearance: auto; }
+        select.form-control option { background-color: #ffffff; color: var(--text-main); }
+        .form-control:focus { border-color: var(--accent-color); box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.1); }
+        
+        .filter-actions { display: flex; gap: 10px; width: 100%; justify-content: flex-end; }
+        .btn-filter { background-color: var(--accent-color); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; height: 40px; box-shadow: 0 1px 3px rgba(233,69,96,0.3); }
+        .btn-reset { background-color: #f4f6f9; color: var(--text-main); border: 1px solid var(--border-color); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; height: 40px; }
+        .btn-filter:hover { background-color: #d13a53; }
+        .btn-reset:hover { background-color: #e5e7eb; }
 
-/* Cửa sổ hẹp (< 900px): bảng cuộn ngang */
-@media (max-width: 900px) {
-  .table-wrapper, .card { overflow-x: auto !important; }
-  table { min-width: 640px; }
-  .topbar { flex-wrap: wrap; gap: 8px; }
-  .page-title, h2 { font-size: 1.35rem !important; }
-}
+        /* --- KPIs --- */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+        .kpi-card { background-color: var(--card-bg); border-radius: 12px; padding: 20px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px; }
+        .kpi-icon { width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .kpi-info h3 { font-size: 1.6rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; }
+        .kpi-info p { color: var(--text-muted); font-size: 0.9rem; font-weight: 500; }
 
-/* ======= MOBILE (≤ 768px) ======= */
-@media (max-width: 768px) {
-  /* Sidebar ẩn, slide-in từ trái */
-  .sidebar {
-    position: fixed !important; transform: translateX(-280px) !important;
-    width: 260px !important; z-index: 1002 !important;
-    transition: transform 0.3s ease !important;
-  }
-  .sidebar.mobile-open { transform: translateX(0) !important; }
-  .sidebar-overlay { display: block; }
-  .sidebar-toggle { display: none; }
-  .mobile-topbar { display: flex; }
-  .main-content { margin-left: 0 !important; padding-top: 70px !important; padding-left: 14px !important; padding-right: 14px !important; }
-  .kpi-grid, .stat-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
-  .kpi-card, .stat-card { padding: 12px !important; }
-  .kpi-info h3 { font-size: 1.35rem !important; }
-  th, td { font-size: 0.78rem !important; padding: 8px 10px !important; }
-  .page-title, h2 { font-size: 1.1rem !important; }
-  .topbar { flex-wrap: wrap; gap: 8px; }
-  /* Reports filter */
-  .filter-section { flex-direction: column !important; }
-  .form-group { min-width: 100% !important; width: 100% !important; }
-  .filter-actions { width: 100%; display: flex; gap: 10px; }
-  .btn-filter, .btn-reset { flex: 1; }
-  /* Map */
-  #map { height: 260px !important; }
-}
+        /* --- TABLE --- */
+        .table-section { background-color: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden; box-shadow: var(--shadow-sm); }
+        .table-wrapper { overflow-x: auto; max-height: 500px; width: 100%; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 12px 15px; border-bottom: 1px solid var(--border-color); white-space: nowrap; font-size: 0.95rem; color: var(--text-main); }
+        th { color: var(--text-muted); font-weight: 600; position: sticky; top: 0; background: #f9fafb; z-index: 10; box-shadow: 0 1px 0 var(--border-color); }
+        
+        .status-badge { padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
+        .st-done { background: rgba(46, 204, 113, 0.15); color: var(--success-color); }
+        .st-issue { background: rgba(231, 76, 60, 0.15); color: var(--danger-color); }
+        .st-other { background: rgba(107, 114, 128, 0.15); color: var(--text-muted); }
 
-</style>
+        .skeleton { background: linear-gradient(90deg, #f0f2f5 25%, #e5e7eb 50%, #f0f2f5 75%); background-size: 200% 100%; animation: loading 1.5s infinite; border-radius: 4px; color: transparent !important; }
+        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* Toast */
+        #toast-container { position: fixed; top: 80px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background-color: var(--card-bg); border-left: 4px solid var(--accent-color); color: var(--text-main); padding: 15px; border-radius: 8px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); transform: translateX(120%); transition: transform 0.3s ease; }
+        .toast.show { transform: translateX(0); }
+
+        /* ================= MEDIA QUERIES ================= */
+        @media (max-width: 1200px) {
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar { width: 70px; }
+            .sidebar .sidebar-text { display: none; }
+            .sidebar .btn-desktop-toggle { display: none; }
+            .sidebar .sidebar-header { justify-content: center; padding: 20px 0; }
+            .sidebar .menu-item { justify-content: center; padding: 15px 0; }
+            .sidebar .menu-item i { margin: 0; font-size: 1.2rem; }
+            .sidebar .sidebar-footer { padding: 20px 10px; }
+            .main-content { margin-left: 70px; }
+        }
+
+        @media (max-width: 900px) {
+            .table-wrapper { -webkit-overflow-scrolling: touch; }
+        }
+
+        @media (max-width: 768px) {
+            .mobile-header { display: flex; }
+            .sidebar { transform: translateX(-100%); width: 260px; z-index: 1002; }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .sidebar .sidebar-text { display: inline; opacity: 1; width: auto; }
+            .sidebar .sidebar-header { justify-content: space-between; padding: 20px; }
+            .sidebar .menu-item { justify-content: flex-start; padding: 15px 25px; }
+            .sidebar .menu-item i { margin-right: 15px; }
+            .sidebar .sidebar-footer { padding: 20px; }
+            
+            .main-content { margin-left: 0 !important; padding: 80px 15px 20px 15px; width: 100%; }
+            th, td { font-size: 0.8rem; padding: 8px; }
+            
+            /* Sắp xếp filter trên mobile */
+            .filter-section { flex-direction: column; align-items: stretch; }
+            .form-group { width: 100%; min-width: 100%; }
+            .filter-actions { justify-content: space-between; margin-top: 10px; }
+            .btn-filter, .btn-reset { flex: 1; }
+        }
+    </style>
 </head>
 <body>
-<div id="toast-container"></div>
-<aside class="sidebar">
-  <div class="sidebar-header">
-    <div class="logo-wrap">
-      <i class="fa-solid fa-truck-fast"></i>
-      <span class="logo-brand-text">TMS <span class="logo-accent">Mini</span></span>
-    </div>
-    <button class="sidebar-toggle" id="sidebar-toggle-btn" title="Đóng/mở menu">
-      <i class="fa-solid fa-bars"></i>
-    </button>
-  </div>
-  <div class="menu">
-    <a href="dashboard.html" class="menu-item" title="Dashboard">
-      <i class="fa-solid fa-chart-pie"></i> <span class="menu-label">Dashboard</span>
-    </a>
-    <a href="fleet.html" class="menu-item" title="Xe & Tài xế">
-      <i class="fa-solid fa-users-gear"></i> <span class="menu-label">Xe & Tài xế</span>
-    </a>
-    <a href="reports.html" class="menu-item active" title="Báo cáo">
-      <i class="fa-solid fa-file-invoice"></i> <span class="menu-label">Báo cáo</span>
-    </a>
-  </div>
-  <div class="sidebar-footer">
-    <button class="btn-logout" id="btn-logout"><i class="fa-solid fa-right-from-bracket"></i> <span class="btn-text">Đăng xuất</span></button>
-  </div>
-</aside>
 
-<main class="main-content">
-  <div class="topbar">
-    <h2 class="page-title">Báo cáo & Lịch sử chuyến đi</h2>
-    <button class="btn-export" id="btn-export" onclick="exportCSV()">
-      <i class="fa-solid fa-download"></i> Xuất CSV
-    </button>
-  </div>
+    <div id="toast-container"></div>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-  <div class="filter-section">
-    <div class="form-group">
-      <label>Từ ngày</label>
-      <input type="date" id="filter-start" class="form-control">
-    </div>
-    <div class="form-group">
-      <label>Đến ngày</label>
-      <input type="date" id="filter-end" class="form-control">
-    </div>
-    <div class="form-group">
-      <label>Tài xế</label>
-      <select id="filter-driver" class="form-control">
-        <option value="ALL">Tất cả tài xế</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Trạng thái</label>
-      <select id="filter-status" class="form-control">
-        <option value="ALL">Tất cả trạng thái</option>
-        <option value="Đã giao xong">Đã giao xong</option>
-        <option value="Sự cố">Sự cố</option>
-      </select>
-    </div>
-    <div class="filter-actions">
-      <button class="btn-filter" onclick="applyFilters()"><i class="fa-solid fa-filter"></i> Lọc</button>
-      <button class="btn-reset" onclick="resetFilters()"><i class="fa-solid fa-rotate-right"></i> Reset</button>
-    </div>
-  </div>
+    <header class="mobile-header">
+        <button class="btn-mobile-toggle" id="mobile-toggle"><i class="fa-solid fa-bars"></i></button>
+        <div class="mobile-header-logo"><i class="fa-solid fa-truck-fast"></i> TMS<span>Mini</span></div>
+        <button class="btn-mobile-logout btn-logout-action"><i class="fa-solid fa-right-from-bracket"></i></button>
+    </header>
 
-  <div class="kpi-grid">
-    <div class="kpi-card">
-      <div class="kpi-icon" style="background: rgba(52, 152, 219, 0.1); color: #3498db;"><i class="fa-solid fa-cubes"></i></div>
-      <div class="kpi-info">
-        <h3 id="kpi-total-trips" class="skeleton">0</h3>
-        <p>Tổng số chuyến</p>
-      </div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-icon" style="background: rgba(46, 204, 113, 0.1); color: var(--success-color);"><i class="fa-solid fa-coins"></i></div>
-      <div class="kpi-info">
-        <h3 id="kpi-total-surcharge" class="skeleton">0</h3>
-        <p>Tổng phí phụ thu (VNĐ)</p>
-      </div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-icon" style="background: rgba(243, 156, 18, 0.1); color: var(--warning-color);"><i class="fa-solid fa-clock-rotate-left"></i></div>
-      <div class="kpi-info">
-        <h3 id="kpi-ontime-rate" class="skeleton">0%</h3>
-        <p>Tỷ lệ giao đúng giờ</p>
-      </div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-icon" style="background: rgba(233, 69, 96, 0.1); color: var(--accent-color);"><i class="fa-solid fa-stopwatch"></i></div>
-      <div class="kpi-info">
-        <h3 id="kpi-total-hours" class="skeleton">0</h3>
-        <p>Tổng TG vận chuyển (giờ)</p>
-      </div>
-    </div>
-  </div>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-wrap">
+                <i class="fa-solid fa-truck-fast"></i>
+                <span class="sidebar-text">TMS Mini</span>
+            </div>
+            <button class="btn-desktop-toggle" id="desktop-toggle" title="Thu gọn/Mở rộng"><i class="fa-solid fa-bars"></i></button>
+        </div>
+        <div class="menu">
+            <a href="dashboard.html" class="menu-item" title="Dashboard">
+                <i class="fa-solid fa-chart-pie"></i> <span class="sidebar-text">Dashboard</span>
+            </a>
+            <a href="fleet.html" class="menu-item" title="Xe & Tài xế">
+                <i class="fa-solid fa-users-gear"></i> <span class="sidebar-text">Xe & Tài xế</span>
+            </a>
+            <a href="reports.html" class="menu-item active" title="Báo cáo">
+                <i class="fa-solid fa-file-invoice"></i> <span class="sidebar-text">Báo cáo</span>
+            </a>
+        </div>
+        <div class="sidebar-footer">
+            <button class="btn-logout btn-logout-action" title="Đăng xuất">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span class="sidebar-text">Đăng xuất</span>
+            </button>
+        </div>
+    </aside>
 
-  <div class="table-section">
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>STT</th>
-            <th>Tài xế</th>
-            <th>Biển số</th>
-            <th>Điểm đi ➔ Đến</th>
-            <th>Khách hàng</th>
-            <th>Loại hàng</th>
-            <th>Bắt đầu</th>
-            <th>Kết thúc</th>
-            <th>Thời gian</th>
-            <th>Phụ thu</th>
-            <th>Trạng thái</th>
-          </tr>
-        </thead>
-        <tbody id="history-table-body">
-          <tr><td colspan="11" class="skeleton">Đang tải dữ liệu...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</main>
+    <main class="main-content" id="main-content">
+        <div class="topbar">
+            <h2 class="page-title">Báo cáo & Lịch sử chuyến đi</h2>
+            <button class="btn-export" id="btn-export" onclick="exportCSV()">
+                <i class="fa-solid fa-download"></i> Xuất CSV
+            </button>
+        </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-import { getDatabase, ref, get, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+        <div class="filter-section">
+            <div class="form-group">
+                <label>Từ ngày</label>
+                <input type="date" id="filter-start" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>Đến ngày</label>
+                <input type="date" id="filter-end" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>Tài xế</label>
+                <select id="filter-driver" class="form-control">
+                    <option value="ALL">Tất cả tài xế</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Trạng thái</label>
+                <select id="filter-status" class="form-control">
+                    <option value="ALL">Tất cả trạng thái</option>
+                    <option value="Đã giao xong">Đã giao xong</option>
+                    <option value="Sự cố">Sự cố</option>
+                </select>
+            </div>
+            <div class="filter-actions">
+                <button class="btn-reset" onclick="resetFilters()"><i class="fa-solid fa-rotate-right"></i> Reset</button>
+                <button class="btn-filter" onclick="applyFilters()"><i class="fa-solid fa-filter"></i> Lọc</button>
+            </div>
+        </div>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDtPkeLFdZqviWfinIMzdHxRHuv47TvUjY",
-  authDomain: "mini-tsm-projectv2.firebaseapp.com",
-  databaseURL: "https://mini-tsm-projectv2-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "mini-tsm-projectv2",
-  storageBucket: "mini-tsm-projectv2.firebasestorage.app",
-  messagingSenderId: "535774659933",
-  appId: "1:535774659933:web:600122096d9dea2f5514b4"
-};
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: rgba(52, 152, 219, 0.1); color: #3498db;"><i class="fa-solid fa-cubes"></i></div>
+                <div class="kpi-info">
+                    <h3 id="kpi-total-trips" class="skeleton">0</h3>
+                    <p>Tổng số chuyến</p>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: rgba(46, 204, 113, 0.1); color: var(--success-color);"><i class="fa-solid fa-coins"></i></div>
+                <div class="kpi-info">
+                    <h3 id="kpi-total-surcharge" class="skeleton">0</h3>
+                    <p>Tổng phí phụ thu (VNĐ)</p>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: rgba(243, 156, 18, 0.1); color: var(--warning-color);"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                <div class="kpi-info">
+                    <h3 id="kpi-ontime-rate" class="skeleton">0%</h3>
+                    <p>Tỷ lệ giao đúng giờ</p>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: rgba(233, 69, 96, 0.1); color: var(--accent-color);"><i class="fa-solid fa-stopwatch"></i></div>
+                <div class="kpi-info">
+                    <h3 id="kpi-total-hours" class="skeleton">0</h3>
+                    <p>Tổng TG vận chuyển (giờ)</p>
+                </div>
+            </div>
+        </div>
 
-// App riêng cho ManagerApp, để session độc lập với DriverApp
-const app = initializeApp(firebaseConfig, "ManagerApp");
-const auth = getAuth(app);
-const db = getDatabase(app);
+        <div class="table-section">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Tài xế</th>
+                            <th>Biển số</th>
+                            <th>Điểm đi ➔ Đến</th>
+                            <th>Khách hàng</th>
+                            <th>Loại hàng</th>
+                            <th>Bắt đầu</th>
+                            <th>Kết thúc</th>
+                            <th>Thời gian</th>
+                            <th>Phụ thu</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table-body">
+                        <tr><td colspan="11" class="skeleton">Đang tải dữ liệu...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
 
-  // =========================================================
-  // SIDEBAR RESPONSIVE — Thêm vào sau: const db = getDatabase(app);
-  // =========================================================
-  const sidebarEl = document.querySelector('.sidebar');
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getDatabase, ref, get, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-  // Tạo overlay mobile
-  const sidebarOverlay = document.createElement('div');
-  sidebarOverlay.className = 'sidebar-overlay';
-  document.body.appendChild(sidebarOverlay);
+        const firebaseConfig = {
+          apiKey: "AIzaSyDtPkeLFdZqviWfinIMzdHxRHuv47TvUjY",
+          authDomain: "mini-tsm-projectv2.firebaseapp.com",
+          databaseURL: "https://mini-tsm-projectv2-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "mini-tsm-projectv2",
+          storageBucket: "mini-tsm-projectv2.firebasestorage.app",
+          messagingSenderId: "535774659933",
+          appId: "1:535774659933:web:600122096d9dea2f5514b4"
+        };
 
-  // Tạo mobile topbar
-  const mobileTopbarEl = document.createElement('div');
-  mobileTopbarEl.className = 'mobile-topbar';
-  mobileTopbarEl.innerHTML = `
-    <button class="mobile-ham" id="mobile-ham-btn"><i class="fa-solid fa-bars"></i></button>
-    <div class="mobile-logo"><i class="fa-solid fa-truck-fast"></i> TMS<span class="m-accent">Mini</span></div>
-    <button class="mobile-logout-btn" id="mobile-logout-btn" title="Đăng xuất"><i class="fa-solid fa-right-from-bracket"></i></button>
-  `;
-  document.body.prepend(mobileTopbarEl);
-  document.getElementById('mobile-logout-btn').addEventListener('click', () => signOut(auth));
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
 
-  // Hamburger mobile
-  document.getElementById('mobile-ham-btn').addEventListener('click', () => {
-    sidebarEl.classList.toggle('mobile-open');
-    sidebarOverlay.classList.toggle('active');
-  });
-  sidebarOverlay.addEventListener('click', () => {
-    sidebarEl.classList.remove('mobile-open');
-    sidebarOverlay.classList.remove('active');
-  });
-  // Đóng sidebar khi chọn menu trên mobile
-  document.querySelectorAll('.menu-item').forEach(item => {
-    item.addEventListener('click', () => {
-      sidebarEl.classList.remove('mobile-open');
-      sidebarOverlay.classList.remove('active');
-    });
-  });
+        // --- UI & SIDEBAR RESPONSIVE LOGIC ---
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('main-content');
+        const desktopToggle = document.getElementById('desktop-toggle');
+        const mobileToggle = document.getElementById('mobile-toggle');
+        const overlay = document.getElementById('sidebar-overlay');
 
-  // Desktop toggle (nút ☰ trong sidebar)
-  const deskToggle = document.getElementById('sidebar-toggle-btn');
-  if (deskToggle) {
-    if (localStorage.getItem('tms_sidebar') === 'collapsed') sidebarEl.classList.add('collapsed');
-    deskToggle.addEventListener('click', () => {
-      sidebarEl.classList.toggle('collapsed');
-      localStorage.setItem('tms_sidebar', sidebarEl.classList.contains('collapsed') ? 'collapsed' : 'expanded');
-    });
-  }
-
-
-let allHistoryData = [];
-let currentFilteredData = [];
-let driversMap = {};
-let fleetMap = {};
-
-// Auth Guard
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    const snapshot = await get(ref(db, 'users/' + user.uid));
-    if (!snapshot.exists() || snapshot.val().role !== 'manager') {
-      window.location.replace('manager-login.html');
-    } else {
-      fetchAllData();
-    }
-  } else {
-    window.location.replace('manager-login.html');
-  }
-});
-
-document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
-
-function showToast(msg) {
-  const container = document.getElementById('toast-container');
-  const toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.innerText = msg;
-  container.appendChild(toast);
-  setTimeout(() => toast.classList.add('show'), 10);
-  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
-}
-
-async function fetchAllData() {
-  try {
-    const usersSnap = await get(ref(db, 'users'));
-    const driverSelect = document.getElementById('filter-driver');
-    if (usersSnap.exists()) {
-      usersSnap.forEach(child => {
-        const d = child.val();
-        if (d.role === 'driver') {
-          driversMap[child.key] = d.name || 'N/A';
-          driverSelect.innerHTML += `<option value="${child.key}">${d.name}</option>`;
+        if (window.innerWidth > 1024 && localStorage.getItem('tms_sidebar') === 'collapsed') {
+            sidebar.classList.add('collapsed');
+            mainContent.classList.add('expanded');
         }
-      });
-    }
 
-    const fleetSnap = await get(ref(db, 'fleet'));
-    if (fleetSnap.exists()) {
-      fleetSnap.forEach(child => {
-        const v = child.val();
-        if (v.driverId) {
-          fleetMap[v.driverId] = child.key;
-        }
-      });
-    }
-
-    onValue(ref(db, 'history'), (snapshot) => {
-      allHistoryData = [];
-      if (snapshot.exists()) {
-        snapshot.forEach(driverChild => {
-          const driverUid = driverChild.key;
-          driverChild.forEach(tripChild => {
-            const trip = tripChild.val();
-            trip.driverUid = driverUid;
-            trip.driverName = driversMap[driverUid] || `Tài xế (${driverUid.substring(0,4)})`;
-            trip.plate = fleetMap[driverUid] || 'Không rõ';
-            allHistoryData.push(trip);
-          });
+        desktopToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('expanded');
+            localStorage.setItem('tms_sidebar', sidebar.classList.contains('collapsed') ? 'collapsed' : 'expanded');
         });
-        allHistoryData.sort((a, b) => (b.endTime || 0) - (a.endTime || 0));
-      }
 
-      currentFilteredData = [...allHistoryData];
-      renderData();
-    });
-  } catch (error) {
-    console.error("Lỗi khi tải dữ liệu:", error);
-    showToast("Lỗi khi tải dữ liệu. Vui lòng tải lại trang.");
-  }
-}
+        mobileToggle.addEventListener('click', () => {
+            sidebar.classList.add('mobile-open');
+            overlay.classList.add('active');
+        });
 
-function formatTime(ms) {
-  if (!ms) return 'N/A';
-  return new Date(ms).toLocaleString('vi-VN', {
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit'
-  });
-}
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('mobile-open');
+            overlay.classList.remove('active');
+        });
 
-function renderData() {
-  const tbody = document.getElementById('history-table-body');
-  tbody.innerHTML = '';
+        window.addEventListener('resize', () => {
+            if (window.innerWidth <= 1024) {
+                sidebar.classList.remove('mobile-open');
+                overlay.classList.remove('active');
+            }
+        });
 
-  let totalSurcharge = 0;
-  let totalHours = 0;
-  let onTimeCount = 0;
-  let completedTrips = 0;
+        let allHistoryData = [];
+        let currentFilteredData = [];
+        let driversMap = {}; 
+        let fleetMap = {}; 
 
-  if (currentFilteredData.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; color: var(--text-muted);">Không có dữ liệu phù hợp</td></tr>`;
-  } else {
-    currentFilteredData.forEach((t, i) => {
-      totalSurcharge += Number(t.surcharge || 0);
+        // Auth Guard
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const snapshot = await get(ref(db, 'users/' + user.uid));
+                if (!snapshot.exists() || snapshot.val().role !== 'manager') {
+                    window.location.replace('manager-login.html');
+                } else {
+                    fetchAllData();
+                }
+            } else {
+                window.location.replace('manager-login.html');
+            }
+        });
 
-      let durationText = 'N/A';
-      if (t.startTime && t.endTime) {
-        const diffMs = t.endTime - t.startTime;
-        const diffHrs = diffMs / 3600000;
-        totalHours += diffHrs;
-        const h = Math.floor(diffHrs);
-        const m = Math.floor((diffMs % 3600000) / 60000);
-        durationText = `${h}h ${m}m`;
-      }
+        document.querySelectorAll('.btn-logout-action').forEach(btn => btn.addEventListener('click', () => signOut(auth)));
 
-      if (t.status === 'Đã giao xong' || t.status === 'Sự cố') {
-        completedTrips++;
-        if (t.endTime && t.eta && new Date(t.endTime) <= new Date(t.eta)) {
-          onTimeCount++;
+        function showToast(msg) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast'; toast.innerText = msg; container.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
         }
-      }
 
-      let statusClass = 'st-other';
-      if (t.status === 'Đã giao xong') statusClass = 'st-done';
-      if (t.status === 'Sự cố') statusClass = 'st-issue';
+        async function fetchAllData() {
+            try {
+                const usersSnap = await get(ref(db, 'users'));
+                const driverSelect = document.getElementById('filter-driver');
+                if (usersSnap.exists()) {
+                    usersSnap.forEach(child => {
+                        const d = child.val();
+                        if(d.role === 'driver') {
+                            driversMap[child.key] = d.name || 'N/A';
+                            driverSelect.innerHTML += `<option value="${child.key}">${d.name}</option>`;
+                        }
+                    });
+                }
 
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${i + 1}</td>
-        <td><strong>${t.driverName}</strong></td>
-        <td>${t.plate}</td>
-        <td>${t.startPoint} <i class="fa-solid fa-arrow-right" style="font-size:0.8rem; color:#9ca3af;"></i> ${t.endPoint}</td>
-        <td>${t.customerName}</td>
-        <td>${t.cargoType}</td>
-        <td>${formatTime(t.startTime)}</td>
-        <td>${formatTime(t.endTime)}</td>
-        <td>${durationText}</td>
-        <td>${Number(t.surcharge || 0).toLocaleString('vi-VN')} đ</td>
-        <td><span class="status-badge ${statusClass}">${t.status}</span></td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
+                const fleetSnap = await get(ref(db, 'fleet'));
+                if (fleetSnap.exists()) {
+                    fleetSnap.forEach(child => {
+                        const v = child.val();
+                        if(v.driverId) fleetMap[v.driverId] = child.key;
+                    });
+                }
 
-  document.querySelectorAll('.skeleton').forEach(el => el.classList.remove('skeleton'));
-  document.getElementById('kpi-total-trips').innerText = currentFilteredData.length;
-  document.getElementById('kpi-total-surcharge').innerText = totalSurcharge.toLocaleString('vi-VN');
-  const onTimeRate = completedTrips > 0 ? ((onTimeCount / completedTrips) * 100).toFixed(1) : 0;
-  document.getElementById('kpi-ontime-rate').innerText = `${onTimeRate}%`;
-  document.getElementById('kpi-total-hours').innerText = totalHours.toFixed(1);
-}
+                onValue(ref(db, 'history'), (snapshot) => {
+                    allHistoryData = [];
+                    if (snapshot.exists()) {
+                        snapshot.forEach(driverChild => {
+                            const driverUid = driverChild.key;
+                            driverChild.forEach(tripChild => {
+                                const trip = tripChild.val();
+                                trip.driverUid = driverUid;
+                                trip.driverName = driversMap[driverUid] || `Tài xế (${driverUid.substring(0,4)})`;
+                                trip.plate = fleetMap[driverUid] || 'Không rõ';
+                                allHistoryData.push(trip);
+                            });
+                        });
+                        allHistoryData.sort((a, b) => (b.endTime || 0) - (a.endTime || 0));
+                    }
+                    currentFilteredData = [...allHistoryData]; renderData();
+                });
 
-window.applyFilters = () => {
-  const startDate = document.getElementById('filter-start').value;
-  const endDate = document.getElementById('filter-end').value;
-  const driverUid = document.getElementById('filter-driver').value;
-  const status = document.getElementById('filter-status').value;
+            } catch (error) { showToast("Lỗi khi tải dữ liệu. Vui lòng tải lại trang."); }
+        }
 
-  let startMs = startDate ? new Date(startDate + "T00:00:00").getTime() : 0;
-  let endMs = endDate ? new Date(endDate + "T23:59:59").getTime() : Infinity;
+        function formatTime(ms) {
+            if(!ms) return 'N/A';
+            return new Date(ms).toLocaleString('vi-VN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+        }
 
-  currentFilteredData = allHistoryData.filter(t => {
-    const tripTime = t.endTime || t.startTime || 0;
-    const matchDate = tripTime >= startMs && tripTime <= endMs;
-    const matchDriver = driverUid === 'ALL' || t.driverUid === driverUid;
-    const matchStatus = status === 'ALL' || t.status === status;
-    return matchDate && matchDriver && matchStatus;
-  });
+        function renderData() {
+            const tbody = document.getElementById('history-table-body'); tbody.innerHTML = '';
+            let totalSurcharge = 0, totalHours = 0, onTimeCount = 0, completedTrips = 0;
 
-  renderData();
-};
+            if (currentFilteredData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; color: var(--text-muted);">Không có dữ liệu phù hợp</td></tr>`;
+            } else {
+                currentFilteredData.forEach((t, i) => {
+                    totalSurcharge += Number(t.surcharge || 0);
+                    let durationText = 'N/A';
+                    if (t.startTime && t.endTime) {
+                        const diffMs = t.endTime - t.startTime; const diffHrs = diffMs / 3600000; totalHours += diffHrs;
+                        const h = Math.floor(diffHrs); const m = Math.floor((diffMs % 3600000) / 60000); durationText = `${h}h ${m}m`;
+                    }
+                    if (t.status === 'Đã giao xong' || t.status === 'Sự cố') {
+                        completedTrips++;
+                        if (t.endTime && t.eta && new Date(t.endTime) <= new Date(t.eta)) onTimeCount++;
+                    }
 
-window.resetFilters = () => {
-  document.getElementById('filter-start').value = '';
-  document.getElementById('filter-end').value = '';
-  document.getElementById('filter-driver').value = 'ALL';
-  document.getElementById('filter-status').value = 'ALL';
-  currentFilteredData = [...allHistoryData];
-  renderData();
-};
+                    let statusClass = 'st-other';
+                    if(t.status === 'Đã giao xong') statusClass = 'st-done';
+                    if(t.status === 'Sự cố') statusClass = 'st-issue';
 
-window.exportCSV = () => {
-  if (currentFilteredData.length === 0) {
-    showToast("Không có dữ liệu để xuất!");
-    return;
-  }
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${i + 1}</td> <td><strong>${t.driverName}</strong></td> <td>${t.plate}</td>
+                        <td>${t.startPoint} <i class="fa-solid fa-arrow-right" style="font-size:0.8rem; color:#aaa;"></i> ${t.endPoint}</td>
+                        <td>${t.customerName}</td> <td>${t.cargoType}</td> <td>${formatTime(t.startTime)}</td> <td>${formatTime(t.endTime)}</td>
+                        <td>${durationText}</td> <td>${Number(t.surcharge || 0).toLocaleString('vi-VN')} đ</td>
+                        <td><span class="status-badge ${statusClass}">${t.status}</span></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
 
-  let csvContent = "\uFEFF";
-  csvContent += "STT,Tài xế,Biển số,Điểm đi,Điểm đến,Khách hàng,Loại hàng,Giờ bắt đầu,Giờ kết thúc,Thời gian,Phụ thu,Trạng thái\n";
+            document.querySelectorAll('.skeleton').forEach(el => el.classList.remove('skeleton'));
+            document.getElementById('kpi-total-trips').innerText = currentFilteredData.length;
+            document.getElementById('kpi-total-surcharge').innerText = totalSurcharge.toLocaleString('vi-VN');
+            const onTimeRate = completedTrips > 0 ? ((onTimeCount / completedTrips) * 100).toFixed(1) : 0;
+            document.getElementById('kpi-ontime-rate').innerText = `${onTimeRate}%`;
+            document.getElementById('kpi-total-hours').innerText = totalHours.toFixed(1);
+        }
 
-  currentFilteredData.forEach((t, i) => {
-    let diffMs = (t.endTime && t.startTime) ? (t.endTime - t.startTime) : 0;
-    let h = Math.floor(diffMs / 3600000);
-    let m = Math.floor((diffMs % 3600000) / 60000);
-    let durationText = diffMs > 0 ? `${h}h ${m}m` : 'N/A';
+        window.applyFilters = () => {
+            const startDate = document.getElementById('filter-start').value; const endDate = document.getElementById('filter-end').value;
+            const driverUid = document.getElementById('filter-driver').value; const status = document.getElementById('filter-status').value;
+            let startMs = startDate ? new Date(startDate + "T00:00:00").getTime() : 0; let endMs = endDate ? new Date(endDate + "T23:59:59").getTime() : Infinity;
+            currentFilteredData = allHistoryData.filter(t => {
+                const tripTime = t.endTime || t.startTime || 0;
+                const matchDate = tripTime >= startMs && tripTime <= endMs;
+                const matchDriver = driverUid === 'ALL' || t.driverUid === driverUid;
+                const matchStatus = status === 'ALL' || t.status === status;
+                return matchDate && matchDriver && matchStatus;
+            });
+            renderData();
+        };
 
-    const row = [
-      i + 1,
-      `"${t.driverName}"`,
-      `"${t.plate}"`,
-      `"${t.startPoint}"`,
-      `"${t.endPoint}"`,
-      `"${t.customerName}"`,
-      `"${t.cargoType}"`,
-      `"${formatTime(t.startTime)}"`,
-      `"${formatTime(t.endTime)}"`,
-      `"${durationText}"`,
-      t.surcharge || 0,
-      `"${t.status}"`
-    ];
-    csvContent += row.join(",") + "\n";
-  });
+        window.resetFilters = () => {
+            document.getElementById('filter-start').value = ''; document.getElementById('filter-end').value = '';
+            document.getElementById('filter-driver').value = 'ALL'; document.getElementById('filter-status').value = 'ALL';
+            currentFilteredData = [...allHistoryData]; renderData();
+        };
 
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.setAttribute("href", url);
-  link.setAttribute("download", `TMS_BaoCao_${new Date().toISOString().slice(0,10)}.csv`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
-</script>
+        window.exportCSV = () => {
+            if (currentFilteredData.length === 0) { showToast("Không có dữ liệu để xuất!"); return; }
+            let csvContent = "\uFEFF"; 
+            csvContent += "STT,Tài xế,Biển số,Điểm đi,Điểm đến,Khách hàng,Loại hàng,Giờ bắt đầu,Giờ kết thúc,Thời gian,Phụ thu,Trạng thái\n";
+            currentFilteredData.forEach((t, i) => {
+                let diffMs = (t.endTime && t.startTime) ? (t.endTime - t.startTime) : 0;
+                let h = Math.floor(diffMs / 3600000); let m = Math.floor((diffMs % 3600000) / 60000); let durationText = diffMs > 0 ? `${h}h ${m}m` : 'N/A';
+                const row = [ i + 1, `"${t.driverName}"`, `"${t.plate}"`, `"${t.startPoint}"`, `"${t.endPoint}"`, `"${t.customerName}"`, `"${t.cargoType}"`, `"${formatTime(t.startTime)}"`, `"${formatTime(t.endTime)}"`, `"${durationText}"`, t.surcharge || 0, `"${t.status}"` ];
+                csvContent += row.join(",") + "\n";
+            });
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob);
+            const link = document.createElement("a"); link.setAttribute("href", url); link.setAttribute("download", `TMS_BaoCao_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        };
+    </script>
 </body>
 </html>
