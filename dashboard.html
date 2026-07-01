@@ -13,27 +13,64 @@
 
     <style>
         :root {
-            --bg-color: #f4f6f9; --sidebar-bg: #ffffff; --card-bg: #ffffff;
-            --accent-color: #e94560; --success-color: #2ecc71; --danger-color: #e74c3c;
-            --warning-color: #f39c12; --text-main: #1a1a2e; --text-muted: #6b7280;
-            --border-color: #e5e7eb; --shadow-sm: 0 1px 3px rgba(0,0,0,0.08); 
-            --status-driving: #2ecc71; --status-pause: #f39c12; --status-issue: #e74c3c;
-            --status-done: #7f8c8d; --status-waiting: #3498db;
+            /* Bảng màu Sáng (Light Theme cố định) */
+            --bg-color: #f4f6f9;
+            --sidebar-bg: #ffffff;
+            --card-bg: #ffffff;
+            --accent-color: #e94560;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --text-main: #1a1a2e;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08); /* Đổ bóng nhẹ */
+            
+            /* Status Colors */
+            --status-driving: #2ecc71;
+            --status-pause: #f39c12;
+            --status-issue: #e74c3c;
+            --status-done: #7f8c8d;
+            --status-waiting: #3498db;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden; }
 
-        .mobile-header { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 60px; background-color: var(--sidebar-bg); box-shadow: var(--shadow-sm); z-index: 999; justify-content: space-between; align-items: center; padding: 0 20px; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* --- MOBILE HEADER (Cố định ở trên cùng) --- */
+        .mobile-header {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 60px;
+            background-color: var(--sidebar-bg); box-shadow: var(--shadow-sm); z-index: 999;
+            justify-content: space-between; align-items: center; padding: 0 20px;
+        }
         .mobile-header-logo { font-size: 1.2rem; font-weight: 700; color: var(--text-main); }
         .mobile-header-logo span { color: var(--accent-color); }
         .btn-mobile-toggle { background: none; border: none; font-size: 1.5rem; color: var(--text-main); cursor: pointer; }
         .btn-mobile-logout { background: none; border: none; font-size: 1.2rem; color: var(--danger-color); cursor: pointer; }
 
-        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; opacity: 0; transition: opacity 0.3s ease; }
+        /* --- LỚP PHỦ OVERLAY CHO MOBILE --- */
+        .sidebar-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 1000; opacity: 0; transition: opacity 0.3s ease;
+        }
         .sidebar-overlay.active { display: block; opacity: 1; }
 
-        .sidebar { width: 260px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; position: fixed; height: 100vh; transition: width 0.3s ease, transform 0.3s ease; z-index: 1001; overflow: hidden; }
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 260px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm); display: flex; flex-direction: column; position: fixed;
+            height: 100vh; transition: width 0.3s ease, transform 0.3s ease; z-index: 1001; overflow: hidden;
+        }
+        
+        /* Trạng thái thu gọn trên Desktop */
         .sidebar.collapsed { width: 70px; }
         .sidebar.collapsed .sidebar-text { opacity: 0; width: 0; display: none; }
         .sidebar.collapsed .sidebar-header { justify-content: center; padding: 20px 0; }
@@ -42,27 +79,42 @@
         .sidebar.collapsed .badge { display: none !important; }
         .sidebar.collapsed .sidebar-footer { padding: 20px 10px; }
         
-        .sidebar-header { padding: 20px; font-size: 1.5rem; font-weight: 700; color: var(--text-main); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
+        .sidebar-header {
+            padding: 20px; font-size: 1.5rem; font-weight: 700; color: var(--text-main);
+            border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;
+        }
         .logo-wrap { display: flex; align-items: center; gap: 10px; overflow: hidden; }
         .logo-wrap span.sidebar-text { color: var(--accent-color); transition: 0.3s; }
         .btn-desktop-toggle { background: none; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer; transition: 0.2s; }
         .btn-desktop-toggle:hover { color: var(--accent-color); }
 
         .menu { flex: 1; padding: 20px 0; }
-        .menu-item { padding: 15px 25px; display: flex; align-items: center; gap: 15px; color: var(--text-muted); font-weight: 500; text-decoration: none; transition: all 0.2s; white-space: nowrap; }
+        .menu-item {
+            padding: 15px 25px; display: flex; align-items: center; gap: 15px; color: var(--text-muted);
+            font-weight: 500; text-decoration: none; transition: all 0.2s; white-space: nowrap;
+        }
         .menu-item:hover, .menu-item.active { background-color: rgba(233, 69, 96, 0.08); color: var(--accent-color); border-right: 3px solid var(--accent-color); }
         .badge { background-color: var(--danger-color); color: white; font-size: 0.75rem; padding: 2px 6px; border-radius: 10px; margin-left: auto; display: none; }
         
         .sidebar-footer { padding: 20px; border-top: 1px solid var(--border-color); }
-        .btn-logout { width: 100%; padding: 12px; background: none; border: 1px solid var(--danger-color); color: var(--danger-color); border-radius: 8px; cursor: pointer; font-family: inherit; font-weight: 600; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; overflow: hidden; white-space: nowrap; }
+        .btn-logout {
+            width: 100%; padding: 12px; background: none; border: 1px solid var(--danger-color); color: var(--danger-color);
+            border-radius: 8px; cursor: pointer; font-family: inherit; font-weight: 600; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 10px; overflow: hidden; white-space: nowrap;
+        }
         .btn-logout:hover { background: var(--danger-color); color: white; }
 
-        .main-content { flex: 1; margin-left: 260px; padding: 20px 30px; display: flex; flex-direction: column; gap: 25px; transition: margin-left 0.3s ease; width: 100%; }
-        .main-content.expanded { margin-left: 70px; }
+        /* --- MAIN CONTENT --- */
+        .main-content {
+            flex: 1; margin-left: 260px; padding: 20px 30px; display: flex; flex-direction: column; gap: 25px;
+            transition: margin-left 0.3s ease; width: 100%;
+        }
+        .main-content.expanded { margin-left: 70px; } /* Khi sidebar thu gọn */
 
         .topbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
         .topbar h2 { font-size: 1.8rem; font-weight: 600; color: var(--text-main); }
 
+        /* KPIs */
         .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
         .kpi-card { background-color: var(--card-bg); border-radius: 12px; padding: 20px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px; }
         .kpi-icon { width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
@@ -70,15 +122,19 @@
         .kpi-info p { color: var(--text-muted); font-size: 0.9rem; font-weight: 500; }
         .kpi-card.alert-card { border-color: var(--danger-color); }
 
+        /* Map & Table */
         .map-section, .table-section { background-color: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); overflow: hidden; }
         .section-header { padding: 15px 20px; border-bottom: 1px solid var(--border-color); font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
         #map { height: 400px; width: 100%; z-index: 1; }
+        
         .custom-marker { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; border: 2px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.3); font-size: 12px; }
         .marker-pulse { animation: pulseWarning 1.5s infinite; }
         @keyframes pulseWarning { 0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(231, 76, 60, 0); } 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); } }
 
         .table-controls { padding: 15px 20px; display: flex; gap: 15px; flex-wrap: wrap; border-bottom: 1px solid var(--border-color); background-color: var(--card-bg); }
         .control-input { padding: 8px 12px; background-color: #f9fafb; border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-main); font-family: inherit; outline: none; }
+        
+        /* Fix màu nền Select */
         select.control-input { background-color: #ffffff; color: var(--text-main); appearance: auto; }
         select.control-input option { background-color: #ffffff; color: var(--text-main); }
         .control-input:focus { border-color: var(--accent-color); box-shadow: 0 0 0 2px rgba(233, 69, 96, 0.1); }
@@ -106,22 +162,50 @@
         .toast { background-color: var(--card-bg); border-left: 4px solid var(--accent-color); color: var(--text-main); padding: 15px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid var(--border-color); transform: translateX(120%); transition: transform 0.3s ease; }
         .toast.show { transform: translateX(0); }
 
-        @media (max-width: 1200px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 1024px) {
-            .sidebar { width: 70px; } .sidebar .sidebar-text, .sidebar .btn-desktop-toggle { display: none; }
-            .sidebar .sidebar-header, .sidebar .menu-item { justify-content: center; padding: 20px 0; }
-            .sidebar .menu-item i { margin: 0; font-size: 1.2rem; } .sidebar .badge { display: none !important; }
-            .sidebar .sidebar-footer { padding: 20px 10px; } .main-content { margin-left: 70px; }
+        /* ================= MEDIA QUERIES ================= */
+        /* Breakpoint 1200px: KPI xuống 2 cột */
+        @media (max-width: 1200px) {
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
         }
-        @media (max-width: 900px) { .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; } }
+
+        /* Breakpoint 1024px: Auto thu gọn Sidebar */
+        @media (max-width: 1024px) {
+            .sidebar { width: 70px; }
+            .sidebar .sidebar-text { display: none; }
+            .sidebar .btn-desktop-toggle { display: none; } /* Ẩn nút gập vì ép buộc gập */
+            .sidebar .sidebar-header { justify-content: center; padding: 20px 0; }
+            .sidebar .menu-item { justify-content: center; padding: 15px 0; }
+            .sidebar .menu-item i { margin: 0; font-size: 1.2rem; }
+            .sidebar .badge { display: none !important; }
+            .sidebar .sidebar-footer { padding: 20px 10px; }
+            .main-content { margin-left: 70px; }
+        }
+
+        /* Breakpoint 900px: Bảng tự cuộn ngang */
+        @media (max-width: 900px) {
+            .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        }
+
+        /* Breakpoint Mobile (<= 768px): Giao diện di động hoàn toàn */
         @media (max-width: 768px) {
-            .mobile-header { display: flex; } .sidebar { transform: translateX(-100%); width: 260px; z-index: 1002; }
-            .sidebar.mobile-open { transform: translateX(0); } .sidebar .sidebar-text { display: inline; opacity: 1; width: auto; }
-            .sidebar .sidebar-header { justify-content: space-between; padding: 20px; } .sidebar .menu-item { justify-content: flex-start; padding: 15px 25px; }
-            .sidebar .menu-item i { margin-right: 15px; } .sidebar .sidebar-footer { padding: 20px; } .sidebar .btn-desktop-toggle { display: none; }
+            .mobile-header { display: flex; }
+            .sidebar { transform: translateX(-100%); width: 260px; z-index: 1002; } /* Khôi phục width cho mobile menu */
+            .sidebar.mobile-open { transform: translateX(0); }
+            /* Khôi phục text bên trong sidebar khi mở trên mobile */
+            .sidebar .sidebar-text { display: inline; opacity: 1; width: auto; }
+            .sidebar .sidebar-header { justify-content: space-between; padding: 20px; }
+            .sidebar .menu-item { justify-content: flex-start; padding: 15px 25px; }
+            .sidebar .menu-item i { margin-right: 15px; }
+            .sidebar .sidebar-footer { padding: 20px; }
+            .sidebar .btn-desktop-toggle { display: none; }
+            
             .main-content { margin-left: 0 !important; padding: 80px 15px 20px 15px; width: 100%; }
-            .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); } .kpi-card { padding: 15px; flex-direction: column; text-align: center; }
-            .kpi-icon { width: 40px; height: 40px; font-size: 1.2rem; margin-bottom: 5px; } #map { height: 250px; } th, td { font-size: 0.8rem; padding: 8px; }
+            .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+            .kpi-card { padding: 15px; flex-direction: column; text-align: center; }
+            .kpi-icon { width: 40px; height: 40px; font-size: 1.2rem; margin-bottom: 5px; }
+            
+            #map { height: 250px; }
+            th, td { font-size: 0.8rem; padding: 8px; }
             .topbar h2 { font-size: 1.5rem; }
         }
     </style>
@@ -164,6 +248,53 @@
             </button>
         </div>
     </aside>
+
+    <!-- Script giao diện (sidebar/mobile menu) tách riêng khỏi script Firebase (type="module") bên dưới.
+         Lý do: script type="module" phải chờ tải xong Firebase SDK qua mạng rồi mới chạy dòng code nào,
+         nên nếu để chung, sidebar sẽ luôn hiện sai trạng thái (bị "giật") mỗi khi chuyển trang.
+         Đặt script thường (không phải module) ở đây giúp nó chạy ngay lập tức, không phải chờ mạng. -->
+    <script>
+        (function () {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+            const desktopToggle = document.getElementById('desktop-toggle');
+            const mobileToggle = document.getElementById('mobile-toggle');
+            const overlay = document.getElementById('sidebar-overlay');
+
+            // Phục hồi trạng thái sidebar từ localStorage cho màn hình Desktop (>1024px)
+            if (window.innerWidth > 1024 && localStorage.getItem('tms_sidebar') === 'collapsed') {
+                sidebar.classList.add('collapsed');
+                mainContent.classList.add('expanded');
+            }
+
+            // Sự kiện gập/mở trên Desktop
+            desktopToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('collapsed');
+                mainContent.classList.toggle('expanded');
+                localStorage.setItem('tms_sidebar', sidebar.classList.contains('collapsed') ? 'collapsed' : 'expanded');
+            });
+
+            // Sự kiện mở menu trên Mobile
+            mobileToggle.addEventListener('click', () => {
+                sidebar.classList.add('mobile-open');
+                overlay.classList.add('active');
+            });
+
+            // Đóng menu Mobile khi click ra ngoài overlay
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('mobile-open');
+                overlay.classList.remove('active');
+            });
+
+            // Cập nhật lại UI khi người dùng resize cửa sổ trình duyệt
+            window.addEventListener('resize', () => {
+                if (window.innerWidth <= 1024) {
+                    sidebar.classList.remove('mobile-open');
+                    overlay.classList.remove('active');
+                }
+            });
+        })();
+    </script>
 
     <main class="main-content" id="main-content">
         <div class="topbar">
@@ -272,40 +403,8 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // --- UI & SIDEBAR RESPONSIVE LOGIC ---
-        const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('main-content');
-        const desktopToggle = document.getElementById('desktop-toggle');
-        const mobileToggle = document.getElementById('mobile-toggle');
-        const overlay = document.getElementById('sidebar-overlay');
-
-        if (window.innerWidth > 1024 && localStorage.getItem('tms_sidebar') === 'collapsed') {
-            sidebar.classList.add('collapsed');
-            mainContent.classList.add('expanded');
-        }
-
-        desktopToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('collapsed');
-            mainContent.classList.toggle('expanded');
-            localStorage.setItem('tms_sidebar', sidebar.classList.contains('collapsed') ? 'collapsed' : 'expanded');
-        });
-
-        mobileToggle.addEventListener('click', () => {
-            sidebar.classList.add('mobile-open');
-            overlay.classList.add('active');
-        });
-
-        overlay.addEventListener('click', () => {
-            sidebar.classList.remove('mobile-open');
-            overlay.classList.remove('active');
-        });
-
-        window.addEventListener('resize', () => {
-            if (window.innerWidth <= 1024) {
-                sidebar.classList.remove('mobile-open');
-                overlay.classList.remove('active');
-            }
-        });
+        // Lưu ý: logic sidebar/mobile-menu đã chuyển sang script riêng phía trên (không phải module)
+        // để không bị chặn bởi thời gian tải Firebase SDK. Xem script ngay sau thẻ </aside>.
 
         function showToast(msg, type = 'info') {
             const colors = { info: 'var(--accent-color)', warning: 'var(--warning-color)', error: 'var(--danger-color)' };
@@ -345,10 +444,12 @@
             }
         });
 
+        // Gắn sự kiện cho tất cả nút đăng xuất (cả Desktop và Mobile)
         document.querySelectorAll('.btn-logout-action').forEach(btn => {
             btn.addEventListener('click', () => signOut(auth));
         });
 
+        // Data Fetching & Processing
         function startRealtimeListener() {
             const vehiclesRef = ref(db, 'vehicles');
             onValue(vehiclesRef, (snapshot) => {
