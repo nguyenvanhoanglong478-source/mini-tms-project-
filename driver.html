@@ -1,575 +1,368 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Bảng điều khiển Tài xế - TMS Mini v2.0</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
-:root {
-  --bg-color: #f4f6f9;
-  --card-bg: #ffffff;
-  --accent-color: #e94560;
-  --success-color: #2ecc71;
-  --danger-color: #e74c3c;
-  --warning-color: #f39c12;
-  --text-main: #1a1a2e;
-  --text-muted: #6b7280;
-  --border-color: #e5e7eb;
-  color-scheme: light;
-}
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  font-family: 'Inter', sans-serif;
-  background-color: var(--bg-color);
-  color: var(--text-main);
-  padding-bottom: 30px;
-}
-/* Header */
-header {
-  background-color: var(--card-bg);
-  padding: 15px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-  border-bottom: 1px solid var(--border-color);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.avatar {
-  width: 40px; height: 40px;
-  border-radius: 50%;
-  background-color: var(--accent-color);
-  color: white;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: bold; font-size: 1.2rem;
-}
-.btn-logout {
-  background: none; border: none;
-  color: var(--danger-color);
-  font-size: 1.2rem; cursor: pointer;
-  padding: 5px;
-}
-/* Main Container */
-.container {
-  padding: 20px;
-  max-width: 600px;
-  margin: 0 auto;
-}
-.card {
-  background-color: var(--card-bg);
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 20px;
-  border: 1px solid var(--border-color);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-}
-.card-title {
-  font-size: 1.1rem; font-weight: 600;
-  margin-bottom: 15px; padding-bottom: 10px;
-  border-bottom: 1px solid var(--border-color);
-  display: flex; justify-content: space-between; align-items: center;
-}
-/* Form Elements */
-.form-group { margin-bottom: 15px; }
-.form-group label {
-  display: block; margin-bottom: 8px;
-  font-size: 0.9rem; color: var(--text-muted);
-}
-.form-control {
-  width: 100%; padding: 12px 15px;
-  background-color: #f9fafb;
-  border: 1px solid var(--border-color);
-  border-radius: 8px; color: var(--text-main);
-  font-size: 1rem; font-family: 'Inter', sans-serif;
-}
-.form-control:focus {
-  outline: none; border-color: var(--accent-color);
-  background-color: #ffffff;
-}
-.form-control:disabled {
-  opacity: 0.7; cursor: not-allowed; background-color: #f3f4f6;
-}
-textarea.form-control { resize: vertical; min-height: 80px; }
-/* Fix dropdown sáng/tối: đảm bảo option luôn có màu chữ + nền tường minh */
-select.form-control {
-  color: var(--text-main);
-  background-color: #f9fafb;
-}
-select.form-control option {
-  color: var(--text-main);
-  background-color: #ffffff;
-}
-/* Status Bar */
-.status-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  text-align: center;
-}
-.stat-box {
-  background-color: #f9fafb;
-  border: 1px solid var(--border-color);
-  padding: 10px; border-radius: 8px;
-}
-.stat-box i { font-size: 1.2rem; margin-bottom: 5px; color: var(--accent-color); }
-.stat-box .value { font-weight: 600; font-size: 0.9rem; margin-top: 5px; }
-.stat-box .label { font-size: 0.75rem; color: var(--text-muted); }
-/* Buttons */
-.btn-group {
-  display: flex; gap: 15px; margin-top: 20px;
-}
-.btn {
-  flex: 1; padding: 16px 10px;
-  border: none; border-radius: 8px;
-  font-size: 1.1rem; font-weight: 600;
-  color: white; cursor: pointer;
-  display: flex; justify-content: center; align-items: center; gap: 8px;
-  transition: opacity 0.2s;
-}
-.btn:active { transform: scale(0.98); }
-.btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn-start { background-color: var(--success-color); }
-.btn-stop { background-color: var(--danger-color); }
-.network-badge {
-  font-size: 0.8rem; padding: 4px 8px; border-radius: 12px;
-  background-color: var(--success-color); color: white;
-}
-.network-badge.offline { background-color: var(--danger-color); }
-/* Toast */
-#toast-container {
-  position: fixed; top: 70px; right: 20px;
-  display: flex; flex-direction: column; gap: 10px; z-index: 9999;
-}
-.toast {
-  background-color: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-left: 4px solid var(--accent-color);
-  color: var(--text-main); padding: 12px 20px; border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.12);
-  transform: translateX(120%); transition: transform 0.3s ease;
-  font-size: 0.9rem;
-}
-.toast.show { transform: translateX(0); }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bảng điều khiển Tài xế - TMS Mini v2.0</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-/* =========================================================
-   DRIVER.HTML — MOBILE RESPONSIVE
-   ========================================================= */
+    <style>
+        :root {
+            /* Bảng màu Sáng cố định */
+            --bg-color: #f4f6f9;
+            --sidebar-bg: #ffffff;
+            --card-bg: #ffffff;
+            --accent-color: #e94560;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --text-main: #1a1a2e;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+        }
 
-/* Form controls full width, gọn trên màn nhỏ */
-@media (max-width: 600px) {
-  .container { padding: 12px !important; }
-  .card { padding: 14px !important; border-radius: 10px !important; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  .form-control {
-    font-size: 0.95rem !important;
-    padding: 11px 12px !important;
-  }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-bottom: 80px; /* Chừa không gian cho nút Kết thúc dính đáy */
+        }
 
-  /* Nút "Kết thúc" sticky cuối màn hình */
-  .btn-end-trip {
-    position: sticky !important;
-    bottom: 0 !important;
-    border-radius: 0 !important;
-    width: 100% !important;
-    z-index: 50 !important;
-    margin-top: 0 !important;
-  }
+        /* Header */
+        header {
+            background-color: var(--card-bg);
+            padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
+            box-shadow: var(--shadow-sm); position: sticky; top: 0; z-index: 100;
+        }
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        .avatar {
+            width: 40px; height: 40px; border-radius: 50%; background-color: var(--accent-color); color: white;
+            display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem;
+        }
+        .btn-logout { background: none; border: none; color: var(--danger-color); font-size: 1.2rem; cursor: pointer; padding: 5px; }
 
-  /* Header tài xế gọn hơn */
-  header { padding: 10px 14px !important; }
-  .user-info { gap: 8px !important; }
-  .user-info small { font-size: 0.72rem !important; }
-  .avatar { width: 34px !important; height: 34px !important; font-size: 1rem !important; }
+        .container { padding: 15px; max-width: 600px; margin: 0 auto; }
 
-  /* Timeline 3 bước */
-  .timeline { gap: 0 !important; }
-  .timeline-step { padding: 8px 4px !important; }
-  .timeline-step .step-label { font-size: 0.7rem !important; }
-  .timeline-connector { min-width: 20px !important; }
+        .card {
+            background-color: var(--card-bg); border-radius: 12px; padding: 20px;
+            margin-bottom: 20px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color);
+        }
+        .card-title {
+            font-size: 1.1rem; font-weight: 600; color: var(--text-main); margin-bottom: 15px; padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;
+        }
 
-  /* GPS bar thông tin */
-  .gps-status-bar {
-    flex-wrap: wrap !important;
-    gap: 8px !important;
-    font-size: 0.78rem !important;
-  }
-  .gps-stat { flex: 1 1 80px !important; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 8px; font-size: 0.9rem; color: var(--text-muted); font-weight: 500; }
+        .form-control {
+            width: 100%; padding: 12px 15px; background-color: #f9fafb; border: 1px solid var(--border-color);
+            border-radius: 8px; color: var(--text-main); font-size: 1rem; font-family: inherit; outline: none;
+        }
+        .form-control:focus { border-color: var(--accent-color); box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.1); }
+        .form-control:disabled { opacity: 0.6; cursor: not-allowed; background-color: #e5e7eb; }
+        select.form-control, input[type="datetime-local"].form-control { background-color: #ffffff; color: var(--text-main); appearance: auto; }
+        textarea.form-control { resize: vertical; min-height: 80px; }
 
-  /* Card title */
-  .card-title { font-size: 1rem !important; }
+        /* Status Grid */
+        .status-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center; }
+        .stat-box { background-color: #f9fafb; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); }
+        .stat-box i { font-size: 1.2rem; margin-bottom: 5px; color: var(--accent-color); }
+        .stat-box .value { font-weight: 600; font-size: 0.95rem; margin-top: 5px; color: var(--text-main); }
+        .stat-box .label { font-size: 0.75rem; color: var(--text-muted); }
 
-  /* Online badge */
-  .badge-online { font-size: 0.75rem !important; padding: 3px 8px !important; }
-}
+        /* Nút cố định dính ở đáy màn hình */
+        .btn-group {
+            display: flex; gap: 15px; position: fixed; bottom: 0; left: 0; width: 100%;
+            background: var(--card-bg); padding: 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 10;
+        }
+        .btn {
+            flex: 1; padding: 16px 10px; border: none; border-radius: 8px; font-size: 1.1rem;
+            font-weight: 600; color: white; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: var(--shadow-sm);
+        }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-start { background-color: var(--success-color); }
+        .btn-stop { background-color: var(--danger-color); }
 
-</style>
+        .network-badge { font-size: 0.8rem; padding: 4px 8px; border-radius: 12px; background-color: rgba(46, 204, 113, 0.15); color: var(--success-color); font-weight: 600; }
+        .network-badge.offline { background-color: rgba(231, 76, 60, 0.15); color: var(--danger-color); }
+
+        #toast-container { position: fixed; top: 70px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 9999; }
+        .toast { background-color: var(--card-bg); border-left: 4px solid var(--accent-color); color: var(--text-main); padding: 12px 20px; border-radius: 8px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); transform: translateX(120%); transition: transform 0.3s ease; font-size: 0.9rem; }
+        .toast.show { transform: translateX(0); }
+    </style>
 </head>
 <body>
-<div id="toast-container"></div>
-<header>
-  <div class="user-info">
-    <div class="avatar" id="user-avatar">?</div>
-    <div>
-      <div style="font-weight: 600;" id="user-name">Đang tải...</div>
-      <div style="font-size: 0.8rem; color: var(--text-muted);">Tài xế</div>
-    </div>
-  </div>
-  <button class="btn-logout" id="btn-logout" title="Đăng xuất">
-    <i class="fa-solid fa-right-from-bracket"></i>
-  </button>
-</header>
 
-<div class="container">
-  <div class="card">
-    <div class="card-title">
-      Chi tiết chuyến hàng
-      <span id="network-status" class="network-badge">Online</span>
-    </div>
-    <form id="trip-form">
-      <div class="form-group">
-        <label>Điểm đi *</label>
-        <input type="text" id="start-point" class="form-control trip-input" required>
-      </div>
-      <div class="form-group">
-        <label>Điểm đến *</label>
-        <input type="text" id="end-point" class="form-control trip-input" required>
-      </div>
-      <div class="form-group">
-        <label>Tên khách hàng *</label>
-        <input type="text" id="customer-name" class="form-control trip-input" required>
-      </div>
-      <div class="form-group">
-        <label>Loại hàng *</label>
-        <select id="cargo-type" class="form-control trip-input" required>
-          <option value="">-- Chọn loại hàng --</option>
-          <option value="Hàng điện tử">Hàng điện tử</option>
-          <option value="Thực phẩm">Thực phẩm</option>
-          <option value="Hàng dễ vỡ">Hàng dễ vỡ</option>
-          <option value="Hàng cồng kềnh">Hàng cồng kềnh</option>
-          <option value="Hàng lạnh">Hàng lạnh</option>
-          <option value="Khác">Khác</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Thời gian giao dự kiến *</label>
-        <input type="datetime-local" id="eta" class="form-control trip-input" required>
-      </div>
-      <div class="form-group">
-        <label>Phí phụ thu (VNĐ)</label>
-        <input type="number" id="surcharge" class="form-control trip-input" placeholder="VD: 50000">
-      </div>
-      <div class="form-group">
-        <label>Ghi chú</label>
-        <textarea id="notes" class="form-control trip-input" placeholder="Lưu ý khi giao hàng..."></textarea>
-      </div>
-      <div class="form-group">
-        <label>Trạng thái hiện tại</label>
-        <select id="trip-status" class="form-control" disabled>
-          <option value="Chờ lấy hàng">Chờ lấy hàng</option>
-          <option value="Đang giao">Đang giao</option>
-          <option value="Tạm dừng">Tạm dừng</option>
-          <option value="Sự cố">Sự cố</option>
-          <option value="Đã giao xong">Đã giao xong</option>
-        </select>
-      </div>
-    </form>
-  </div>
+    <div id="toast-container"></div>
 
-  <div class="card">
-    <div class="card-title">Hành trình</div>
-    <div class="status-grid">
-      <div class="stat-box">
-        <i class="fa-solid fa-location-dot"></i>
-        <div class="label">GPS</div>
-        <div class="value" id="gps-status">Đang tìm...</div>
-      </div>
-      <div class="stat-box">
-        <i class="fa-solid fa-gauge-high"></i>
-        <div class="label">Tốc độ</div>
-        <div class="value"><span id="speed-val">0</span> km/h</div>
-      </div>
-      <div class="stat-box">
-        <i class="fa-solid fa-stopwatch"></i>
-        <div class="label">Đã chạy</div>
-        <div class="value" id="time-val">00:00:00</div>
-      </div>
+    <header>
+        <div class="user-info">
+            <div class="avatar" id="user-avatar">?</div>
+            <div>
+                <div style="font-weight: 600; font-size: 1.1rem;" id="user-name">Đang tải...</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">Tài xế</div>
+            </div>
+        </div>
+        <button class="btn-logout" id="btn-logout" title="Đăng xuất">
+            <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-title">
+                Chi tiết chuyến hàng
+                <span id="network-status" class="network-badge">Online</span>
+            </div>
+            <form id="trip-form">
+                <div class="form-group">
+                    <label>Điểm đi *</label>
+                    <input type="text" id="start-point" class="form-control trip-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Điểm đến *</label>
+                    <input type="text" id="end-point" class="form-control trip-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Tên khách hàng *</label>
+                    <input type="text" id="customer-name" class="form-control trip-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Loại hàng *</label>
+                    <select id="cargo-type" class="form-control trip-input" required>
+                        <option value="">-- Chọn loại hàng --</option>
+                        <option value="Hàng điện tử">Hàng điện tử</option>
+                        <option value="Thực phẩm">Thực phẩm</option>
+                        <option value="Hàng dễ vỡ">Hàng dễ vỡ</option>
+                        <option value="Hàng cồng kềnh">Hàng cồng kềnh</option>
+                        <option value="Hàng lạnh">Hàng lạnh</option>
+                        <option value="Khác">Khác</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Thời gian giao dự kiến *</label>
+                    <input type="datetime-local" id="eta" class="form-control trip-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Phí phụ thu (VNĐ)</label>
+                    <input type="number" id="surcharge" class="form-control trip-input" placeholder="VD: 50000">
+                </div>
+                <div class="form-group">
+                    <label>Ghi chú</label>
+                    <textarea id="notes" class="form-control trip-input" placeholder="Lưu ý khi giao hàng..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Trạng thái hiện tại</label>
+                    <select id="trip-status" class="form-control" disabled>
+                        <option value="Chờ lấy hàng">Chờ lấy hàng</option>
+                        <option value="Đang giao">Đang giao</option>
+                        <option value="Tạm dừng">Tạm dừng</option>
+                        <option value="Sự cố">Sự cố</option>
+                        <option value="Đã giao xong">Đã giao xong</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+
+        <div class="card" style="margin-bottom: 40px;">
+            <div class="card-title">Hành trình</div>
+            <div class="status-grid">
+                <div class="stat-box">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <div class="label">GPS</div>
+                    <div class="value" id="gps-status">Đang tìm...</div>
+                </div>
+                <div class="stat-box">
+                    <i class="fa-solid fa-gauge-high"></i>
+                    <div class="label">Tốc độ</div>
+                    <div class="value"><span id="speed-val">0</span> km/h</div>
+                </div>
+                <div class="stat-box">
+                    <i class="fa-solid fa-stopwatch"></i>
+                    <div class="label">Đã chạy</div>
+                    <div class="value" id="time-val">00:00:00</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="btn-group">
-      <button type="button" class="btn btn-start" id="btn-start">
-        🚀 Bắt đầu
-      </button>
-      <button type="button" class="btn btn-stop" id="btn-stop" disabled>
-        ⏹ Kết thúc
-      </button>
+        <button type="button" class="btn btn-start" id="btn-start">
+            🚀 Bắt đầu
+        </button>
+        <button type="button" class="btn btn-stop" id="btn-stop" disabled style="display: none;">
+            ⏹ Kết thúc
+        </button>
     </div>
-  </div>
-</div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-import { getDatabase, ref, get, set, update, push } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getDatabase, ref, get, set, update, push } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDtPkeLFdZqviWfinIMzdHxRHuv47TvUjY",
-  authDomain: "mini-tsm-projectv2.firebaseapp.com",
-  databaseURL: "https://mini-tsm-projectv2-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "mini-tsm-projectv2",
-  storageBucket: "mini-tsm-projectv2.firebasestorage.app",
-  messagingSenderId: "535774659933",
-  appId: "1:535774659933:web:600122096d9dea2f5514b4"
-};
+        const firebaseConfig = {
+          apiKey: "AIzaSyDtPkeLFdZqviWfinIMzdHxRHuv47TvUjY",
+          authDomain: "mini-tsm-projectv2.firebaseapp.com",
+          databaseURL: "https://mini-tsm-projectv2-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "mini-tsm-projectv2",
+          storageBucket: "mini-tsm-projectv2.firebasestorage.app",
+          messagingSenderId: "535774659933",
+          appId: "1:535774659933:web:600122096d9dea2f5514b4"
+        };
 
-// App riêng cho DriverApp, để session độc lập với ManagerApp
-const app = initializeApp(firebaseConfig, "DriverApp");
-const auth = getAuth(app);
-const db = getDatabase(app);
+        const app = initializeApp(firebaseConfig, "DriverApp");
+        const auth = getAuth(app);
+        const db = getDatabase(app);
 
-// Variables
-let currentUser = null;
-let isTripActive = false;
-let tripStartTime = null;
-let timerInterval = null;
-let syncInterval = null;
-let watchPositionId = null;
-let currentLoc = { lat: 0, lng: 0, speed: 0 };
-let currentTripId = null;
+        // Variables
+        let currentUser = null; let isTripActive = false; let tripStartTime = null;
+        let timerInterval = null; let syncInterval = null; let watchPositionId = null;
+        let currentLoc = { lat: 0, lng: 0, speed: 0 }; let currentTripId = null;
 
-// Elements
-const btnStart = document.getElementById('btn-start');
-const btnStop = document.getElementById('btn-stop');
-const tripForm = document.getElementById('trip-form');
-const tripInputs = document.querySelectorAll('.trip-input');
-const statusSelect = document.getElementById('trip-status');
-const toastContainer = document.getElementById('toast-container');
-const networkBadge = document.getElementById('network-status');
+        const btnStart = document.getElementById('btn-start'); const btnStop = document.getElementById('btn-stop');
+        const tripForm = document.getElementById('trip-form'); const tripInputs = document.querySelectorAll('.trip-input');
+        const statusSelect = document.getElementById('trip-status'); const toastContainer = document.getElementById('toast-container');
+        const networkBadge = document.getElementById('network-status');
 
-function showToast(msg, color = 'var(--accent-color)') {
-  const toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.style.borderLeftColor = color;
-  toast.innerText = msg;
-  toastContainer.appendChild(toast);
-  setTimeout(() => toast.classList.add('show'), 10);
-  setTimeout(() => {
-    toast.classList.remove('show');
-    setTimeout(() => toast.remove(), 300);
-  }, 3000);
-}
+        function showToast(msg, color = 'var(--accent-color)') {
+            const toast = document.createElement('div'); toast.className = 'toast'; toast.style.borderLeftColor = color;
+            toast.innerText = msg; toastContainer.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
+        }
 
-// Auth Guard
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    const userRef = ref(db, 'users/' + user.uid);
-    const snapshot = await get(userRef);
-    if (snapshot.exists() && snapshot.val().role === 'driver') {
-      currentUser = user;
-      const emailName = user.email.split('@')[0];
-      document.getElementById('user-name').innerText = emailName;
-      document.getElementById('user-avatar').innerText = emailName.charAt(0).toUpperCase();
-    } else {
-      await signOut(auth);
-      window.location.replace('driver-login.html');
-    }
-  } else {
-    window.location.replace('driver-login.html');
-  }
-});
+        // Auth Guard
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userRef = ref(db, 'users/' + user.uid); const snapshot = await get(userRef);
+                if (snapshot.exists() && snapshot.val().role === 'driver') {
+                    currentUser = user;
+                    const emailName = user.email.split('@')[0];
+                    document.getElementById('user-name').innerText = emailName;
+                    document.getElementById('user-avatar').innerText = emailName.charAt(0).toUpperCase();
+                } else {
+                    await signOut(auth); window.location.replace('driver-login.html');
+                }
+            } else {
+                window.location.replace('driver-login.html');
+            }
+        });
 
-// Logout
-document.getElementById('btn-logout').addEventListener('click', async () => {
-  if (isTripActive) {
-    alert("Vui lòng kết thúc chuyến đi trước khi đăng xuất!");
-    return;
-  }
-  await signOut(auth);
-});
+        document.getElementById('btn-logout').addEventListener('click', async () => {
+            if (isTripActive) { alert("Vui lòng kết thúc chuyến đi trước khi đăng xuất!"); return; }
+            await signOut(auth);
+        });
 
-// Offline / Online Status
-window.addEventListener('online', () => {
-  networkBadge.innerText = 'Online';
-  networkBadge.className = 'network-badge';
-  syncOfflineData();
-});
-window.addEventListener('offline', () => {
-  networkBadge.innerText = 'Offline';
-  networkBadge.className = 'network-badge offline';
-  showToast("Mất kết nối mạng. Dữ liệu sẽ được lưu nội bộ.", "var(--danger-color)");
-});
+        // Offline / Online Status
+        window.addEventListener('online', () => { networkBadge.innerText = 'Online'; networkBadge.className = 'network-badge'; syncOfflineData(); });
+        window.addEventListener('offline', () => { networkBadge.innerText = 'Offline'; networkBadge.className = 'network-badge offline'; showToast("Mất kết nối mạng. Dữ liệu sẽ lưu nội bộ.", "var(--danger-color)"); });
 
-function saveToOfflineQueue(path, data) {
-  let queue = JSON.parse(localStorage.getItem('tms_offline_queue')) || [];
-  queue.push({ path, data, timestamp: Date.now() });
-  localStorage.setItem('tms_offline_queue', JSON.stringify(queue));
-}
+        function saveToOfflineQueue(path, data) {
+            let queue = JSON.parse(localStorage.getItem('tms_offline_queue')) || [];
+            queue.push({ path, data, timestamp: Date.now() }); localStorage.setItem('tms_offline_queue', JSON.stringify(queue));
+        }
 
-async function syncOfflineData() {
-  let queue = JSON.parse(localStorage.getItem('tms_offline_queue')) || [];
-  if (queue.length === 0) return;
-  showToast("Đang đồng bộ dữ liệu...", "var(--warning-color)");
-  for (let item of queue) {
-    try {
-      await set(ref(db, item.path), item.data);
-    } catch (e) {
-      console.error("Lỗi sync:", e);
-      return;
-    }
-  }
-  localStorage.removeItem('tms_offline_queue');
-  showToast("Đồng bộ thành công!", "var(--success-color)");
-}
+        async function syncOfflineData() {
+            let queue = JSON.parse(localStorage.getItem('tms_offline_queue')) || [];
+            if (queue.length === 0) return;
+            showToast("Đang đồng bộ dữ liệu...", "var(--warning-color)");
+            for (let item of queue) {
+                try { await set(ref(db, item.path), item.data); } catch (e) { console.error("Lỗi sync:", e); return; }
+            }
+            localStorage.removeItem('tms_offline_queue'); showToast("Đồng bộ thành công!", "var(--success-color)");
+        }
 
-// Timer
-function updateTimer() {
-  if (!tripStartTime) return;
-  const diff = Math.floor((Date.now() - tripStartTime) / 1000);
-  const h = String(Math.floor(diff / 3600)).padStart(2, '0');
-  const m = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
-  const s = String(diff % 60).padStart(2, '0');
-  document.getElementById('time-val').innerText = `${h}:${m}:${s}`;
-}
+        function updateTimer() {
+            if (!tripStartTime) return;
+            const diff = Math.floor((Date.now() - tripStartTime) / 1000);
+            const h = String(Math.floor(diff / 3600)).padStart(2, '0'); const m = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
+            const s = String(diff % 60).padStart(2, '0'); document.getElementById('time-val').innerText = `${h}:${m}:${s}`;
+        }
 
-// GPS Tracking
-function startTracking() {
-  if ('geolocation' in navigator) {
-    watchPositionId = navigator.geolocation.watchPosition(
-      (position) => {
-        currentLoc.lat = position.coords.latitude;
-        currentLoc.lng = position.coords.longitude;
-        currentLoc.speed = position.coords.speed ? Math.round(position.coords.speed * 3.6) : 0;
-        document.getElementById('gps-status').innerText = 'Bật';
-        document.getElementById('speed-val').innerText = currentLoc.speed;
-      },
-      (error) => {
-        document.getElementById('gps-status').innerText = 'Lỗi';
-        console.error('GPS Error:', error);
-      },
-      { enableHighAccuracy: true, maximumAge: 0 }
-    );
-  } else {
-    document.getElementById('gps-status').innerText = 'K.Hỗ trợ';
-  }
-}
+        function startTracking() {
+            if ('geolocation' in navigator) {
+                watchPositionId = navigator.geolocation.watchPosition(
+                    (position) => {
+                        currentLoc.lat = position.coords.latitude; currentLoc.lng = position.coords.longitude;
+                        currentLoc.speed = position.coords.speed ? Math.round(position.coords.speed * 3.6) : 0;
+                        document.getElementById('gps-status').innerText = 'Bật'; document.getElementById('speed-val').innerText = currentLoc.speed;
+                    },
+                    (error) => { document.getElementById('gps-status').innerText = 'Lỗi'; },
+                    { enableHighAccuracy: true, maximumAge: 0 }
+                );
+            } else { document.getElementById('gps-status').innerText = 'K.Hỗ trợ'; }
+        }
 
-function stopTracking() {
-  if (watchPositionId) navigator.geolocation.clearWatch(watchPositionId);
-  document.getElementById('gps-status').innerText = 'Tắt';
-  document.getElementById('speed-val').innerText = '0';
-}
+        function stopTracking() {
+            if (watchPositionId) navigator.geolocation.clearWatch(watchPositionId);
+            document.getElementById('gps-status').innerText = 'Tắt'; document.getElementById('speed-val').innerText = '0';
+        }
 
-// Data builder
-function getTripData() {
-  return {
-    startPoint: document.getElementById('start-point').value,
-    endPoint: document.getElementById('end-point').value,
-    customerName: document.getElementById('customer-name').value,
-    cargoType: document.getElementById('cargo-type').value,
-    eta: document.getElementById('eta').value,
-    surcharge: document.getElementById('surcharge').value || 0,
-    notes: document.getElementById('notes').value,
-    status: statusSelect.value,
-    location: currentLoc,
-    lastUpdated: Date.now(),
-    startTime: tripStartTime,
-    tripId: currentTripId
-  };
-}
+        function getTripData() {
+            return {
+                startPoint: document.getElementById('start-point').value, endPoint: document.getElementById('end-point').value,
+                customerName: document.getElementById('customer-name').value, cargoType: document.getElementById('cargo-type').value,
+                eta: document.getElementById('eta').value, surcharge: document.getElementById('surcharge').value || 0,
+                notes: document.getElementById('notes').value, status: statusSelect.value, location: currentLoc,
+                lastUpdated: Date.now(), startTime: tripStartTime, tripId: currentTripId
+            };
+        }
 
-// Nút Bắt đầu
-btnStart.addEventListener('click', async () => {
-  if (!tripForm.checkValidity()) {
-    tripForm.reportValidity();
-    return;
-  }
+        btnStart.addEventListener('click', async () => {
+            if (!tripForm.checkValidity()) { tripForm.reportValidity(); return; }
+            isTripActive = true; tripStartTime = Date.now(); currentTripId = 'TRIP_' + tripStartTime;
 
-  isTripActive = true;
-  tripStartTime = Date.now();
-  currentTripId = 'TRIP_' + tripStartTime;
+            tripInputs.forEach(input => input.disabled = true); statusSelect.disabled = false; statusSelect.value = 'Đang giao';
+            btnStart.style.display = 'none'; btnStop.style.display = 'flex'; btnStop.disabled = false;
+            
+            showToast("🚀 Bắt đầu chuyến đi!", "var(--success-color)");
+            startTracking(); timerInterval = setInterval(updateTimer, 1000);
 
-  tripInputs.forEach(input => input.disabled = true);
-  statusSelect.disabled = false;
-  statusSelect.value = 'Đang giao';
-  btnStart.disabled = true;
-  btnStart.style.display = 'none';
-  btnStop.disabled = false;
+            syncInterval = setInterval(() => {
+                const data = getTripData(); const path = `vehicles/${currentUser.uid}`;
+                if (navigator.onLine) set(ref(db, path), data).catch(e => saveToOfflineQueue(path, data));
+                else saveToOfflineQueue(path, data);
+            }, 10000);
+            if(navigator.onLine) set(ref(db, `vehicles/${currentUser.uid}`), getTripData());
+        });
 
-  showToast("🚀 Bắt đầu chuyến đi!", "var(--success-color)");
-  startTracking();
-  timerInterval = setInterval(updateTimer, 1000);
+        statusSelect.addEventListener('change', () => {
+            if(isTripActive) {
+                const data = getTripData();
+                if(navigator.onLine) set(ref(db, `vehicles/${currentUser.uid}`), data);
+                showToast(`Đã chuyển trạng thái: ${statusSelect.value}`);
+            }
+        });
 
-  syncInterval = setInterval(() => {
-    const data = getTripData();
-    const path = `vehicles/${currentUser.uid}`;
-    if (navigator.onLine) {
-      set(ref(db, path), data).catch(e => saveToOfflineQueue(path, data));
-    } else {
-      saveToOfflineQueue(path, data);
-    }
-  }, 10000);
+        btnStop.addEventListener('click', async () => {
+            if (!confirm("Bạn có chắc muốn kết thúc chuyến hàng này?")) return;
+            statusSelect.value = 'Đã giao xong'; const finalData = getTripData(); finalData.endTime = Date.now();
 
-  if (navigator.onLine) set(ref(db, `vehicles/${currentUser.uid}`), getTripData());
-});
+            clearInterval(timerInterval); clearInterval(syncInterval); stopTracking();
 
-// Đổi trạng thái giữa chừng (Sync ngay)
-statusSelect.addEventListener('change', () => {
-  if (isTripActive) {
-    const data = getTripData();
-    if (navigator.onLine) set(ref(db, `vehicles/${currentUser.uid}`), data);
-    showToast(`Đã chuyển trạng thái: ${statusSelect.value}`);
-  }
-});
+            try {
+                if (navigator.onLine) {
+                    await set(ref(db, `history/${currentUser.uid}/${currentTripId}`), finalData);
+                    await set(ref(db, `vehicles/${currentUser.uid}`), null);
+                } else {
+                    saveToOfflineQueue(`history/${currentUser.uid}/${currentTripId}`, finalData); saveToOfflineQueue(`vehicles/${currentUser.uid}`, null);
+                }
+                showToast("⏹ Đã kết thúc và lưu chuyến đi!", "var(--success-color)");
+            } catch (error) { showToast("Lỗi khi kết thúc. Vui lòng thử lại."); return; }
 
-// Nút Kết thúc
-btnStop.addEventListener('click', async () => {
-  if (!confirm("Bạn có chắc chắn muốn kết thúc chuyến hàng này?")) return;
-
-  statusSelect.value = 'Đã giao xong';
-  const finalData = getTripData();
-  finalData.endTime = Date.now();
-
-  clearInterval(timerInterval);
-  clearInterval(syncInterval);
-  stopTracking();
-
-  try {
-    if (navigator.onLine) {
-      const historyRef = ref(db, `history/${currentUser.uid}/${currentTripId}`);
-      await set(historyRef, finalData);
-      await set(ref(db, `vehicles/${currentUser.uid}`), null);
-    } else {
-      saveToOfflineQueue(`history/${currentUser.uid}/${currentTripId}`, finalData);
-      saveToOfflineQueue(`vehicles/${currentUser.uid}`, null);
-    }
-    showToast("⏹ Đã kết thúc và lưu chuyến đi!", "var(--success-color)");
-  } catch (error) {
-    console.error(error);
-    showToast("Lỗi khi kết thúc. Vui lòng thử lại.");
-    return;
-  }
-
-  isTripActive = false;
-  tripStartTime = null;
-  currentTripId = null;
-  tripForm.reset();
-  tripInputs.forEach(input => input.disabled = false);
-  statusSelect.disabled = true;
-  btnStart.disabled = false;
-  btnStart.style.display = 'flex';
-  btnStop.disabled = true;
-  document.getElementById('time-val').innerText = '00:00:00';
-});
-</script>
+            isTripActive = false; tripStartTime = null; currentTripId = null;
+            tripForm.reset(); tripInputs.forEach(input => input.disabled = false); statusSelect.disabled = true;
+            
+            btnStop.style.display = 'none'; btnStop.disabled = true;
+            btnStart.style.display = 'flex'; document.getElementById('time-val').innerText = '00:00:00';
+        });
+    </script>
 </body>
 </html>
