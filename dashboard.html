@@ -217,28 +217,176 @@ th { color: var(--text-muted); font-weight: 500; font-size: 0.9rem; }
   .main-content { margin-left: 0; }
   .menu-toggle { display: block; }
 }
+
+/* ===========================================================
+   RESPONSIVE SIDEBAR & LAYOUT — Tự động thêm vào
+   =========================================================== */
+
+/* --- Transition mượt cho sidebar & main --- */
+.sidebar { transition: width 0.3s ease, transform 0.3s ease !important; overflow: hidden !important; }
+.main-content { transition: margin-left 0.3s ease !important; }
+
+/* --- Nút toggle ☰ trong sidebar --- */
+.sidebar-toggle {
+  background: none; border: none; color: var(--text-muted);
+  font-size: 1.1rem; cursor: pointer; padding: 6px 9px;
+  border-radius: 6px; transition: background 0.2s; flex-shrink: 0; line-height: 1;
+}
+.sidebar-toggle:hover { background: rgba(233,69,96,0.1); color: var(--accent-color); }
+
+/* --- Cấu trúc lại sidebar-header --- */
+.sidebar-header {
+  display: flex !important; justify-content: space-between !important;
+  align-items: center !important; padding: 15px 18px !important;
+}
+.logo-wrap { display: flex; align-items: center; gap: 10px; font-size: 1.4rem; font-weight: 700; }
+.logo-wrap .logo-accent { color: var(--accent-color); }
+.logo-brand-text { white-space: nowrap; overflow: hidden; transition: all 0.3s; }
+
+/* --- menu-label & btn-text transition --- */
+.menu-label { transition: opacity 0.25s, width 0.25s, margin 0.25s; white-space: nowrap; overflow: hidden; }
+.btn-text { transition: opacity 0.25s, width 0.25s; white-space: nowrap; overflow: hidden; }
+
+/* ---- Trạng thái THU GỌN (collapsed) ---- */
+.sidebar.collapsed { width: 68px !important; }
+.sidebar.collapsed + .main-content { margin-left: 68px !important; }
+.sidebar.collapsed .logo-brand-text { width: 0; opacity: 0; margin: 0; overflow: hidden; }
+.sidebar.collapsed .menu-label { width: 0; opacity: 0; margin: 0; }
+.sidebar.collapsed .btn-text { width: 0; opacity: 0; margin: 0; }
+.sidebar.collapsed .menu-item { justify-content: center !important; padding: 15px 10px !important; }
+.sidebar.collapsed .menu-item i { font-size: 1.15rem; }
+.sidebar.collapsed .btn-logout {
+  display: flex !important; justify-content: center !important;
+  padding: 10px !important; width: auto !important;
+}
+/* Badge khi collapsed */
+.sidebar.collapsed .badge { position: absolute; top: 6px; right: 6px; margin: 0; }
+
+/* --- Tooltip khi collapsed --- */
+.menu-item { position: relative; }
+.sidebar.collapsed .menu-item::after {
+  content: attr(title); position: absolute; left: 78px; top: 50%;
+  transform: translateY(-50%); background: #1e293b; color: #fff;
+  padding: 5px 11px; border-radius: 7px; font-size: 0.8rem;
+  white-space: nowrap; opacity: 0; pointer-events: none;
+  transition: opacity 0.2s; z-index: 9999;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+}
+.sidebar.collapsed .menu-item:hover::after { opacity: 1; }
+
+/* --- Overlay dark (mobile) --- */
+.sidebar-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.52); z-index: 998;
+  opacity: 0; transition: opacity 0.3s;
+}
+.sidebar-overlay.active { opacity: 1; }
+
+/* --- Mobile topbar --- */
+.mobile-topbar {
+  display: none; position: fixed; top: 0; left: 0; right: 0; height: 58px;
+  background: var(--sidebar-bg); border-bottom: 1px solid var(--border-color);
+  align-items: center; padding: 0 14px;
+  justify-content: space-between; z-index: 1000; gap: 10px;
+}
+.mobile-logo { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.mobile-logo .m-accent { color: var(--accent-color); }
+.mobile-ham {
+  background: none; border: none; color: var(--text-main);
+  font-size: 1.25rem; cursor: pointer; padding: 7px; border-radius: 6px; line-height: 1;
+}
+.mobile-ham:hover { background: rgba(233,69,96,0.08); color: var(--accent-color); }
+.mobile-logout-btn {
+  background: none; border: none; color: var(--accent-color);
+  font-size: 1.1rem; cursor: pointer; padding: 7px; border-radius: 6px;
+}
+
+/* =================== BREAKPOINTS =================== */
+
+/* Desktop hẹp (< 1200px): KPI 2 cột */
+@media (max-width: 1200px) {
+  .kpi-grid, .stat-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* Desktop nhỏ (769–1024px): sidebar tự thu gọn */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .sidebar { width: 68px !important; }
+  .main-content { margin-left: 68px !important; }
+  .sidebar .logo-brand-text { width: 0; opacity: 0; overflow: hidden; }
+  .sidebar .menu-label { width: 0; opacity: 0; overflow: hidden; }
+  .sidebar .btn-text { width: 0; opacity: 0; overflow: hidden; }
+  .sidebar .menu-item { justify-content: center !important; padding: 15px 10px !important; }
+  .sidebar .btn-logout { display: flex !important; justify-content: center !important; padding: 10px !important; width: auto !important; }
+}
+
+/* Cửa sổ hẹp (< 900px): bảng cuộn ngang */
+@media (max-width: 900px) {
+  .table-wrapper, .card { overflow-x: auto !important; }
+  table { min-width: 640px; }
+  .topbar { flex-wrap: wrap; gap: 8px; }
+  .page-title, h2 { font-size: 1.35rem !important; }
+}
+
+/* ======= MOBILE (≤ 768px) ======= */
+@media (max-width: 768px) {
+  /* Sidebar ẩn, slide-in từ trái */
+  .sidebar {
+    position: fixed !important; transform: translateX(-280px) !important;
+    width: 260px !important; z-index: 1002 !important;
+    transition: transform 0.3s ease !important;
+  }
+  .sidebar.mobile-open { transform: translateX(0) !important; }
+  .sidebar-overlay { display: block; }
+  .sidebar-toggle { display: none; }
+  .mobile-topbar { display: flex; }
+  .main-content { margin-left: 0 !important; padding-top: 70px !important; padding-left: 14px !important; padding-right: 14px !important; }
+  .kpi-grid, .stat-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+  .kpi-card, .stat-card { padding: 12px !important; }
+  .kpi-info h3 { font-size: 1.35rem !important; }
+  th, td { font-size: 0.78rem !important; padding: 8px 10px !important; }
+  .page-title, h2 { font-size: 1.1rem !important; }
+  .topbar { flex-wrap: wrap; gap: 8px; }
+  /* Reports filter */
+  .filter-section { flex-direction: column !important; }
+  .form-group { min-width: 100% !important; width: 100% !important; }
+  .filter-actions { width: 100%; display: flex; gap: 10px; }
+  .btn-filter, .btn-reset { flex: 1; }
+  /* Map */
+  #map { height: 260px !important; }
+}
+
 </style>
 </head>
 <body>
 <div id="toast-container"></div>
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-header">
-    <i class="fa-solid fa-truck-fast"></i> TMS<span>Mini</span>
+    <div class="logo-wrap">
+      <i class="fa-solid fa-truck-fast"></i>
+      <span class="logo-brand-text">TMS <span class="logo-accent">Mini</span></span>
+    </div>
+    <button class="sidebar-toggle" id="sidebar-toggle-btn" title="Đóng/mở menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
   </div>
   <div class="menu">
-    <a href="dashboard.html" class="menu-item active">
-      <i class="fa-solid fa-chart-pie"></i> Dashboard
+    <a href="dashboard.html" class="menu-item active" title="Dashboard">
+      <i class="fa-solid fa-chart-pie"></i> <span class="menu-label">Dashboard</span>
     </a>
-    <a href="fleet.html" class="menu-item">
-      <i class="fa-solid fa-users-gear"></i> Xe & Tài xế
+    <a href="fleet.html" class="menu-item" title="Xe & Tài xế
+      <span class="badge" id="issue-badge">0</span>">
+      <i class="fa-solid fa-users-gear"></i> <span class="menu-label">Xe & Tài xế
+      <span class="badge" id="issue-badge">0</span></span>
       <span class="badge" id="issue-badge">0</span>
     </a>
-    <a href="reports.html" class="menu-item">
-      <i class="fa-solid fa-file-invoice"></i> Báo cáo
+    <a href="reports.html" class="menu-item" title="Báo cáo">
+      <i class="fa-solid fa-file-invoice"></i> <span class="menu-label">Báo cáo</span>
     </a>
   </div>
   <div class="sidebar-footer">
-    <button class="btn-logout" id="btn-logout">Đăng xuất</button>
+    <button class="btn-logout" id="btn-logout"><i class="fa-solid fa-right-from-bracket"></i> <span class="btn-text">Đăng xuất</span></button>
   </div>
 </aside>
 
@@ -351,6 +499,55 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig, "ManagerApp");
 const auth = getAuth(app);
 const db = getDatabase(app);
+
+  // =========================================================
+  // SIDEBAR RESPONSIVE — Thêm vào sau: const db = getDatabase(app);
+  // =========================================================
+  const sidebarEl = document.querySelector('.sidebar');
+
+  // Tạo overlay mobile
+  const sidebarOverlay = document.createElement('div');
+  sidebarOverlay.className = 'sidebar-overlay';
+  document.body.appendChild(sidebarOverlay);
+
+  // Tạo mobile topbar
+  const mobileTopbarEl = document.createElement('div');
+  mobileTopbarEl.className = 'mobile-topbar';
+  mobileTopbarEl.innerHTML = `
+    <button class="mobile-ham" id="mobile-ham-btn"><i class="fa-solid fa-bars"></i></button>
+    <div class="mobile-logo"><i class="fa-solid fa-truck-fast"></i> TMS<span class="m-accent">Mini</span></div>
+    <button class="mobile-logout-btn" id="mobile-logout-btn" title="Đăng xuất"><i class="fa-solid fa-right-from-bracket"></i></button>
+  `;
+  document.body.prepend(mobileTopbarEl);
+  document.getElementById('mobile-logout-btn').addEventListener('click', () => signOut(auth));
+
+  // Hamburger mobile
+  document.getElementById('mobile-ham-btn').addEventListener('click', () => {
+    sidebarEl.classList.toggle('mobile-open');
+    sidebarOverlay.classList.toggle('active');
+  });
+  sidebarOverlay.addEventListener('click', () => {
+    sidebarEl.classList.remove('mobile-open');
+    sidebarOverlay.classList.remove('active');
+  });
+  // Đóng sidebar khi chọn menu trên mobile
+  document.querySelectorAll('.menu-item').forEach(item => {
+    item.addEventListener('click', () => {
+      sidebarEl.classList.remove('mobile-open');
+      sidebarOverlay.classList.remove('active');
+    });
+  });
+
+  // Desktop toggle (nút ☰ trong sidebar)
+  const deskToggle = document.getElementById('sidebar-toggle-btn');
+  if (deskToggle) {
+    if (localStorage.getItem('tms_sidebar') === 'collapsed') sidebarEl.classList.add('collapsed');
+    deskToggle.addEventListener('click', () => {
+      sidebarEl.classList.toggle('collapsed');
+      localStorage.setItem('tms_sidebar', sidebarEl.classList.contains('collapsed') ? 'collapsed' : 'expanded');
+    });
+  }
+
 
 // UI Interactions
 const sidebar = document.getElementById('sidebar');
